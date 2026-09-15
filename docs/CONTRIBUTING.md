@@ -6,7 +6,7 @@ How work moves through this repo. CI enforces most of it, so reading this saves 
 - [Commits](#commits)
 - [Pull requests](#pull-requests)
 - [Issues and milestones](#issues-and-milestones)
-- [Testing on the camera](#testing-on-the-camera)
+- [Testing](#testing)
 - [Releases](#releases)
 
 ## Branches
@@ -102,7 +102,7 @@ exactly this reason.
 **Every PR needs an approving review from a code owner** ([.github/CODEOWNERS](../.github/CODEOWNERS))
 before it can merge, and review threads must be resolved.
 
-Required checks: `build`, `version-consistency`, `commit-lint`, `pr-title`. They are **strict**: the checks
+Required checks: `build`, `test`, `version-consistency`, `commit-lint`, `pr-title`. They are **strict**: the checks
 have to have run with `development` at its current tip, so a PR that has fallen behind cannot merge until it
 is brought up to date. Rebase it — that keeps the branch a clean series on top of `development` and keeps the
 squashed commit honest:
@@ -130,9 +130,18 @@ would be painful, since the merge only ever squashes down to one commit anyway.
 - **`needs-on-camera-verification`** is the important one. Nothing about recipes, settings-store IDs or live
   preview can be validated by CI. A green build is not evidence the change works.
 
-## Testing on the camera
+## Testing
 
-A green build only proves it compiles. Before asking for a merge:
+`./tools/test.sh` runs the unit tests — the `test` CI job — against a bare JDK 17 in a few seconds. They cover
+what the app decides without the camera: the recipe table, how each value is encoded in the settings store, the
+bytes ENTER writes, the live-preview parameters, chip navigation and the overlay text
+([details](DEVELOPMENT.md#unit-tests)). Logic of that kind goes into `Params.java` or `Recipes.java` with a
+test next to it; `MainActivity` and the views cannot be tested off the camera.
+
+### On the camera
+
+A green build only proves it compiles, and a green `test` only that the app would write the bytes it means to
+— not that the camera means the same thing by them. Before asking for a merge:
 
 1. Grab the APK — your PR's workflow artifact, or `RecipeLab-dev.apk` from the `dev` prerelease.
 2. Install it: `pmca-console.py install -d native -f RecipeLab.apk` (or PMCA-GUI → Install App).

@@ -22,6 +22,7 @@ Closes #
 ## Checklist
 
 - [ ] Built locally (`build.cmd` or `./build.sh`)
+- [ ] `./tools/test.sh` passes, and new camera-free logic lives in `Params`/`Recipes` with a test
 - [ ] Tested on an A6000 **and power-cycled** — the look survives a restart
 - [ ] README recipe count updated, if recipes changed
 - [ ] Version strings untouched (the release PR owns those)

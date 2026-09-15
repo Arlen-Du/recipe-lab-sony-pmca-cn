@@ -63,12 +63,16 @@ Closes #123
 - Keep `build.cmd` and `build.sh` in step. A change to one needs the same change in the other.
 - The `errno.h` park must stay reversible (`build.sh` does it from an `EXIT` trap). A build that leaves the
   submodule dirty is a bug.
+- `./tools/test.sh` runs the unit tests: the `test` CI job, JDK 17 only, no SDK. Logic that needs no camera
+  goes in `Params.java` or `Recipes.java` **with a test**, never into `MainActivity`. Both are compiled there
+  **without** `android.jar`, so an `android.*` import in either breaks the job.
 
 ## What CI cannot check
 
-Nothing about recipes, settings-store IDs, live preview or key handling can be validated by a build. Those
-changes need a real A6000, exercised **and power-cycled** — a look that vanishes after a power cycle was
-never stored. Say so plainly rather than implying a green build means the change works.
+Nothing about recipes, settings-store IDs, live preview or key handling can be validated by a build. The unit
+tests prove which bytes and parameters the app *sends*, not what the camera *does* with them. Those changes
+need a real A6000, exercised **and power-cycled** — a look that vanishes after a power cycle was never stored.
+Say so plainly rather than implying a green build or a green `test` means the change works.
 
 ## Releasing
 

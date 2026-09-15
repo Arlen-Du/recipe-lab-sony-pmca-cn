@@ -14,6 +14,7 @@ see [CONTRIBUTING.md](CONTRIBUTING.md).
 - [Live preview](#live-preview)
 - [Developing on WSL](#developing-on-wsl)
 - [Building](#building)
+- [Unit tests](#unit-tests)
 - [Installing on the camera](#installing-on-the-camera)
 - [Versioning](#versioning)
 - [Adding recipes](#adding-recipes)
@@ -25,8 +26,10 @@ see [CONTRIBUTING.md](CONTRIBUTING.md).
 ```
 AndroidManifest.xml            package com.voxivoid.recipelab
 src/com/voxivoid/recipelab/
-  MainActivity.java            UI state, key handling, live preview (CameraEx via reflection), store + sync
-  Recipes.java                 the 77 recipes, brands, GROUP_START / GROUP_COUNT
+  MainActivity.java            UI state, key handling, the camera (CameraEx via reflection), store + sync
+  Params.java                  the parameter rows: slot ids, store encodings, preview parameters, chip
+                               navigation, HUD strings — pure functions, no Android, covered by test/
+  Recipes.java                 the 77 recipes, brands, GROUP_START / GROUP_COUNT, table navigation
   res/raw/ids.txt              every settings entry of 16 bytes or less, used by the C1 snapshot/diff tool
   PickerView.java              Canvas-drawn brand browser
   Legend.java                  Canvas-drawn key icons, fit-to-width (camera font has no symbol glyphs)
@@ -35,9 +38,10 @@ src/com/voxivoid/recipelab/
 jni/jni.cpp                    Backup_read / Backup_write / Backup_sync_all via OpenMemories-Platform
 jni/platform/                  git submodule: ma1co/OpenMemories-Platform
 res/                           layout, shape drawables, launcher icon
+test/com/voxivoid/recipelab/   JUnit tests for Recipes and Params (see Unit tests)
 build.sh                       the build: ndk-build, aapt, javac, d8, zipalign, apksigner
 build.cmd                      the same seven steps on Windows
-tools/                         version computation, bumping, and the CI gates
+tools/                         version computation, bumping, the unit tests, and the CI gates
 ```
 
 ## Settings slots
@@ -202,6 +206,45 @@ PATH), zipalign and apksigner — **v1 signing only**, since the camera does not
 different key **cannot be installed over an existing one** — the camera would need the app removed first.
 CI therefore signs with the project key, held as the `ANDROID_KEYSTORE_B64` repo secret; set the same four
 `ANDROID_KEYSTORE_*` variables locally if you need a build that updates an existing install in place.
+
+## Unit tests
+
+```bash
+export JAVA_HOME=$HOME/toolchains/jdk17
+./tools/test.sh              # everything
+./tools/test.sh Writes       # only test classes whose name contains "Writes"
+```
+
+That is the whole of the `test` CI job. It needs a JDK 17 and nothing else: `Recipes.java` and `Params.java`
+are compiled against the bare JDK — no `android.jar`, no NDK — then the tests under `test/` are compiled and run
+with the JUnit 5 console launcher, one jar fetched from Maven Central into `out/test/` on first use and checked
+against a SHA-256 pinned in the script (`JUNIT_JAR=<path>` points it at a copy when offline). Reports land in
+`out/test/reports/`.
+
+**What is covered.** Everything that decides without the camera lives in `Params` and `Recipes`, and the tests
+pin it down:
+
+| | |
+|---|---|
+| `RecipesTest` | the table itself — 77 recipes, group order, every value inside its row's range, kelvin in whole hundreds, sub-parameters that exist for the effect; labels, `summary()`, wrap-around navigation |
+| `ParamsCodecTest` | how the store encodes each row (DRO bytes, PP3 for the matrix, magenta-positive G-M, the quality pair, signed vs unsigned slots) and how it reads back |
+| `ParamsWritesTest` | which bytes ENTER writes for a recipe — golden lists for a few, and every recipe stored over a factory camera, then on top of each other, read back through the same decoder |
+| `ParamsPreviewTest` | the `Camera.Parameters` the live preview sets, recipe by recipe |
+| `ParamsChipsTest` | chip visibility, stepping (wrap vs clamp, the effect → SUB / quality side effects), LEFT/RIGHT and UP/DOWN landing spots, chip text |
+| `ParamsHudTest` | the meta line, the minimal pill, the quality prompt |
+| `ParamsToolsTest` | the C1 tool's id list — including that `res/raw/ids.txt` is well formed and lists every slot the app writes — and its diff lines |
+
+**What is not, and cannot be.** `MainActivity` (key dispatch, overlays, the camera and the JNI store), the
+Canvas views (`PickerView`, `PromptView`, `HintBar`, `Legend`) and `jni/jni.cpp` need a running camera or an
+Android runtime; there is no Gradle and no Robolectric here, and a mock of `CameraEx` would prove nothing. Those
+stay on the [on-camera checklist](CONTRIBUTING.md#on-the-camera). Likewise the slot ids themselves: a
+test can show that the app writes `0x01070175 = 6`, not that the camera means B&W by it.
+
+**Keeping it that way.** New logic that does not need the camera goes into `Params` (or `Recipes`) with a test
+next to it, and is called from `MainActivity`, never the other way round. `tools/test.sh` compiles the two
+without `android.jar` on purpose: an `android.*` import in either fails there before it fails in CI. Tests
+are plain JUnit 5 (`org.junit.jupiter.api`), one behaviour per method, no mocking library; `Fixtures` has a
+factory-fresh camera as rows and as store bytes and a fake store to write into.
 
 ### Installing on the camera
 
