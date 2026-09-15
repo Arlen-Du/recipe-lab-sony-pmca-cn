@@ -50,6 +50,29 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: ./tools/check-version.sh
 
+  # Recipes and Params compile against the bare JDK -- no SDK, no NDK -- so this finishes long before
+  # the build does. tools/test.sh is the whole job; run it locally before pushing.
+  test:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Run the unit tests
+        run: ./tools/test.sh
+      # The tests only write under out/; anything else is a script writing where it should not.
+      - name: Working tree must be clean
+        run: git diff --exit-code
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: junit-reports
+          path: out/test/reports
+          retention-days: 14
+
   build:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
