@@ -55,6 +55,9 @@ public class Recipes {
     public static final String[] PE_KEYS = { "off", "toy-camera", "pop-color", "posterization", "retro-photo", "soft-high-key", "part-color", "rough-mono", "soft-focus", "hdr-art", "richtone-mono", "miniature", "illust", "watercolor" };
     public static final String[] PE_LABEL = { "off", "Toy", "Pop", "Poster", "Retro", "High-key", "Part col", "HC mono", "Soft foc", "HDR art", "Rich mono", "Miniature", "Illust", "Watercol" };
     public static final int PE_OFF = 0, PE_TOY = 1, PE_POP = 2, PE_RETRO = 4, PE_HIGHKEY = 5, PE_HCMONO = 7;
+    /** chip / HUD labels with a "?n" fallback for a stored value outside the table */
+    public static String styleLabel(int v) { return v >= 1 && v < STYLE_LABEL.length ? STYLE_LABEL[v] : "?" + v; }
+    public static String peLabel(int v) { return v >= 0 && v < PE_LABEL.length ? PE_LABEL[v] : "?" + v; }
     /** effect sub-parameter (tint / tone / hue / mode): runtime key, stored slot, value names — index = stored byte */
     public static String subKey(int pe) { switch (pe) { case 5: return "pe-soft-high-key-effect"; case 1: return "pe-toy-camera-effect"; case 6: return "pe-part-color-effect"; case 3: return "pe-posterization-effect"; default: return null; } }
     public static int subId(int pe) { switch (pe) { case 5: return 0x010709d8; case 1: return 0x010706f3; case 6: return 0x010706ee; case 3: return 0x010706ef; default: return 0; } }
@@ -184,5 +187,16 @@ public class Recipes {
             if (GROUP_START[g] < 0) GROUP_START[g] = i;
             GROUP_COUNT[g]++;
         }
+    }
+
+    // ---- navigation: every step wraps, dir is +1 / -1
+    /** the recipe after / before i over the whole table */
+    public static int next(int i, int dir) { return (i + ALL.length + dir) % ALL.length; }
+    /** the first recipe of the brand after / before i's */
+    public static int nextGroupStart(int i, int dir) { return GROUP_START[(ALL[i].group + GROUPS.length + dir) % GROUPS.length]; }
+    /** the recipe after / before i within its brand */
+    public static int nextInGroup(int i, int dir) {
+        int g = ALL[i].group, start = GROUP_START[g], n = GROUP_COUNT[g];
+        return start + ((i - start + n + dir) % n);
     }
 }
