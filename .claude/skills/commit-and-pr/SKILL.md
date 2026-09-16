@@ -1,12 +1,12 @@
 ---
 name: commit-and-pr
-description: Commit with a conventional commit message, push, and open a GitHub pull request against development
+description: Commit with a conventional commit message, push, and open a GitHub pull request against main
 argument-hint: "[message hint]"
 ---
 
 # Commit and Open a GitHub Pull Request
 
-Commit the current changes, push, and open a PR into `development` if one does not already
+Commit the current changes, push, and open a PR into `main` if one does not already
 exist. The rules here are enforced by CI — see [docs/CONTRIBUTING.md](../../../docs/CONTRIBUTING.md).
 
 > **Never merge the PR.** Every PR needs an approving review from a code owner. Open it and
@@ -26,10 +26,10 @@ git log --oneline -5              # recent commits, for style
 git branch --show-current
 ```
 
-### 2. Create a branch (if on `main` or `development`)
+### 2. Create a branch (if on `main`)
 
-**Never commit to `main` or `development`.** Both are protected; `main` is releases only.
-If the current branch is either, create a work branch first.
+**Never commit to `main`.** It is the only long-lived branch and every change reaches it
+through a PR. If the current branch is `main`, create a work branch first.
 
 Every branch needs a GitHub issue. If the change has no issue yet, create one:
 
@@ -70,7 +70,7 @@ After committing, check the whole branch — this also warns about any commit th
 reference the branch's issue:
 
 ```bash
-./tools/check-commit-msg.sh --range origin/development..HEAD
+./tools/check-commit-msg.sh --range origin/main..HEAD
 ```
 
 If you touched a workflow, validate it too:
@@ -144,10 +144,10 @@ Check for an existing one first:
 gh pr list --head "$(git branch --show-current)"
 ```
 
-If none exists, create it. **The base is `development`, never `main`.**
+If none exists, create it. **The base is `main`** — it is the only long-lived branch.
 
 **The PR title is the most important string in this workflow.** A squash merge leaves only
-the title, so it becomes the commit on `development` *and* it is what semantic-release reads
+the title, so it becomes the commit on `main` *and* it is what semantic-release reads
 to decide the next version:
 
 | title type | release |
@@ -171,7 +171,7 @@ check validates the format but cannot tell you the type is wrong.
 Wrap file paths, function names and commands in backticks.
 
 ```bash
-gh pr create --base development \
+gh pr create --base main \
   --title "<type>(<scope>): <subject>" \
   --assignee @me \
   --body "$(cat <<'EOF'
@@ -210,7 +210,7 @@ gh issue edit <issue> --add-label "needs-on-camera-verification"
 
 The install path for a PR build is the workflow artifact, or `RecipeLab-dev.apk` from the
 rolling [`dev` prerelease](https://github.com/voxivoid/recipe-lab-sony-pmca/releases/tag/dev)
-once the change is on `development`.
+once the change is on `main`.
 
 ### 10. Check CI
 

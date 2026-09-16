@@ -7,9 +7,9 @@ name: ci
 # pull_request event through only for forks, whose pushes never reach this repo.
 on:
   push:
-    branches-ignore: [development, main]
+    branches-ignore: [main]
   pull_request:
-    branches: [development, main]
+    branches: [main]
 
 permissions:
   contents: read
@@ -39,7 +39,7 @@ jobs:
           fetch-depth: 0
       - name: Check commit subjects
         run: |
-          git fetch --no-tags origin development
+          git fetch --no-tags origin main
           BASE="$(git merge-base FETCH_HEAD HEAD)"
           ./tools/check-commit-msg.sh --range "$BASE..HEAD"
 

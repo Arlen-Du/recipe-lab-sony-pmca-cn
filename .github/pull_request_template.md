@@ -1,5 +1,5 @@
 <!--
-  The PR TITLE becomes the commit message on `development`, so it must be a valid
+  The PR TITLE becomes the commit message on `main`, so it must be a valid
   Conventional Commit subject:  type(scope): subject
   types   feat fix docs refactor perf test build ci chore revert
   scopes  ui input browser recipes tools build ci docs deps release   (optional)

@@ -34,12 +34,12 @@ Everything this skill creates lives in the scratchpad. Never write a test into `
 
 ## Phase 0: Establish Base Branch & Scope
 
-1. Find the branch and its open PR base (this repo is GitHub, and the base is `development`, never `main`):
+1. Find the branch and its open PR base (this repo is GitHub, and the base is `main` — the only long-lived branch):
 
    ```bash
    BRANCH=$(git branch --show-current)
    TARGET=$(gh pr list --head "$BRANCH" --json baseRefName --jq '.[0].baseRefName' 2>/dev/null)
-   TARGET="${TARGET:-development}"
+   TARGET="${TARGET:-main}"
    ```
 
 2. Compute the merge base — **fail if either command errors**, since a stale ref or an empty `$BASE`
@@ -396,7 +396,7 @@ Run this on success, failure or timeout:
 ```markdown
 ## Test Feature Report
 
-**Base**: compared against `development` (merge-base `abc1234`), issue #NN
+**Base**: compared against `main` (merge-base `abc1234`), issue #NN
 
 ### Behavioral Changes
 - X changed, Y intentional, Z flagged, W unverifiable off-camera

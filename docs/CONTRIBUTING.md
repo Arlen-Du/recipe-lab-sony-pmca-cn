@@ -13,17 +13,18 @@ How work moves through this repo. CI enforces most of it, so reading this saves 
 
 | Branch | Role |
 |---|---|
-| `main` | **Releases only.** Every commit on it is a release, tagged `vX.Y.Z`. Never commit here directly. |
-| `development` | Default branch. Integration. Every push builds a `-dev.N` APK attached to the rolling [`dev` prerelease](https://github.com/voxivoid/recipe-lab-sony-pmca/releases/tag/dev), whose notes list every change since the last release. |
-| work branches | One per issue, cut from `development`, merged back into it. |
+| `main` | Default branch, and the only long-lived one. Integration *and* releases. Every push builds a `-dev.N` APK attached to the rolling [`dev` prerelease](https://github.com/voxivoid/recipe-lab-sony-pmca/releases/tag/dev), whose notes list every change since the last release. Never commit here directly — go through a PR. |
+| work branches | One per change, cut from `main`, squash-merged back. |
 
 ```
-main         ──●──────────────────●──────────────●──   releases only
-                \                /              /
-development   ───●──●──●──●──●──●──●──●──●──●──●───    integration
-                    \      /   \     /
-work branches    feat/12-…   fix/19-…
+main   ──●──●──●──●──●──●──●──●──●──●──●──   every push builds a dev APK
+         \      /   \     /        ▲
+work   feat/12-…   fix/19-…        └── v1.2.0, a tag on main — not a branch
 ```
+
+A release is a **tag on `main`**, not a branch and not a merge. `main` therefore carries
+unreleased work between releases, and `create-release` ships whatever is on it at the moment
+you run it.
 
 Naming — the prefix is the commit type, so the branch says what kind of change it carries:
 
@@ -31,11 +32,11 @@ Naming — the prefix is the commit type, so the branch says what kind of change
 feat/<issue>-<slug>        feat/123-brand-jump-top-dial
 fix/<issue>-<slug>         fix/131-wb-finetune-sign
 docs/ refactor/ chore/ build/ ci/ perf/ test/   same shape
-hotfix/<x.y.z>             branched off main → PR to main → back-merged to development
 ```
 
-Every branch except `hotfix/*` carries its issue number. There is no `release/*` branch:
-**create-release** merges `development` into `main` itself.
+An issue number is optional; drop it and use `<type>/<slug>` when there is no issue. There is no
+`release/*` branch and no `hotfix/*` branch — a hotfix is an ordinary `fix/` branch, released by
+running **create-release** once it lands.
 
 ## Commits
 
@@ -79,10 +80,10 @@ git branch --show-current | sed -nE 's|^[a-z]+/([0-9]+)-.*|\1|p'
 ```
 
 `commit-lint` warns (it does not fail) about any commit on the branch that omits the reference — release
-commits and back-merges legitimately have none.
+commits legitimately have none.
 
 Keep it out of the subject: GitHub appends the **PR** number there automatically on squash merge, so the
-commit on `development` reads `feat(browser): jump to a brand with the top dial (#45)`. Two bare `#N` in one
+commit on `main` reads `feat(browser): jump to a brand with the top dial (#45)`. Two bare `#N` in one
 subject would be ambiguous, since issues and PRs share a number space.
 
 ## Pull requests
@@ -95,34 +96,35 @@ is the string semantic-release reads to decide the next version. A PR titled `ch
 however large its diff; `fix:` makes a patch, `feat:` a minor, `!` a major. The `pr-title` check exists for
 exactly this reason.
 
-- work branch → `development`: **squash merge**. One commit per issue; your WIP never surfaces.
-- `development` → `main`: **merge commit**, never squash. Squashing would put a commit on `main` that is not
-  on `development` and the branches would diverge permanently.
+- work branch → `main`: **squash merge**. One commit per change; your WIP never surfaces.
 
-**Every PR needs an approving review from a code owner** ([.github/CODEOWNERS](../.github/CODEOWNERS))
-before it can merge, and review threads must be resolved.
+Checks on a PR: `build`, `test`, `version-consistency`, `commit-lint`, `pr-title`.
 
-Required checks: `build`, `test`, `version-consistency`, `commit-lint`, `pr-title`. They are **strict**: the checks
-have to have run with `development` at its current tip, so a PR that has fallen behind cannot merge until it
-is brought up to date. Rebase it — that keeps the branch a clean series on top of `development` and keeps the
-squashed commit honest:
+> **They are not enforced as merge gates, and that is deliberate.** `main` is protected only against
+> deletion and non-fast-forward pushes. It cannot require pull requests or passing checks, because
+> semantic-release pushes the `chore(release): X.Y.Z [skip ci]` bump straight to `main` — a rule
+> requiring a PR would reject it, and `[skip ci]` means no status check can ever pass for it. So the
+> checks tell you whether a PR is safe; they do not stop you merging it anyway. Read them.
+
+Rebase a PR that has fallen behind, so its checks reflect the tip and the squashed commit stays honest:
 
 ```sh
 git fetch origin
-git rebase origin/development
+git rebase origin/main
 git push --force-with-lease
 ```
 
-GitHub's **Update branch** button does the same job by merging `development` in; it is fine when a rebase
+GitHub's **Update branch** button does the same job by merging `main` in; it is fine when a rebase
 would be painful, since the merge only ever squashes down to one commit anyway.
 
-> GitHub does not let you approve your own pull request. While `@voxivoid` is the only code
-> owner, their own PRs cannot be approved by anyone else and have to be merged using the
-> repository-admin bypass. Adding a second code owner is what makes the rule bite.
+> [.github/CODEOWNERS](../.github/CODEOWNERS) still marks who owns what, but with no `pull_request`
+> rule on `main` a review is a convention rather than a gate. GitHub does not let you approve your own
+> pull request anyway, so while `@voxivoid` is the only code owner there is nobody to enforce it against.
+> Adding a second code owner, and the rule to go with it, is what would make review bite.
 
 ## Issues and milestones
 
-- Every unit of work gets an issue before a branch.
+- An issue is optional. Open one when the work benefits from being tracked; never open one just to have a number.
 - **Milestones are versions** (`v1.1.0`, `v1.2.0`) plus a permanent `Backlog`. The release workflow closes a
   milestone when its tag ships.
 - Labels: `type: …` mirrors the commit type, `scope: …` mirrors the commit scope, plus `priority: p1|p2|p3`
@@ -132,7 +134,7 @@ would be painful, since the merge only ever squashes down to one commit anyway.
 
 ## Testing
 
-`./tools/test.sh` runs the unit tests — the `test` CI job, and the first step of every `development` build
+`./tools/test.sh` runs the unit tests — the `test` CI job, and the first step of every `main` build
 and of a release — against a bare JDK 17 in a few seconds. They cover
 what the app decides without the camera: the recipe table, how each value is encoded in the settings store, the
 bytes ENTER writes, the live-preview parameters, chip navigation and the overlay text
@@ -155,8 +157,8 @@ Never commit an APK or a keystore. Both are gitignored; releases carry the binar
 ## Releases
 
 **Actions → create-release → Run workflow** (`-f dry_run=true` to just see what would ship). semantic-release
-reads the commits, decides the version, builds, tags and publishes; the workflow merges `development` into
-`main` around it and fast-forwards back. Nobody picks a version number.
+reads the commits on `main`, decides the version, builds, tags `main`'s tip and publishes, then commits the
+manifest bump back. Nothing is merged and no branch moves. Nobody picks a version number.
 Details: **[RELEASING.md](RELEASING.md)**.
 
 Handy aliases:
