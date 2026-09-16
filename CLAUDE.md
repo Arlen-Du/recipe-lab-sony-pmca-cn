@@ -8,20 +8,24 @@ The rules below are the ones that break things when ignored.
 
 ## Branching
 
-- **Never commit to `main`.** `main` is releases only; every commit on it is tagged.
-- Branch off `development`: `feat/<issue>-<slug>` or `feat/<slug>`, likewise `fix/`, and also
+- **There is one long-lived branch: `main`.** Work branches are cut from it and squash-merged back.
+  `main` is not "releases only" — it carries unreleased work between releases, and a release is a
+  tag on it, not a branch of its own. Do not commit to it directly; go through a PR.
+- Branch off `main`: `feat/<issue>-<slug>` or `feat/<slug>`, likewise `fix/`, and also
   `docs/ refactor/ chore/ build/ ci/ perf/ test/`.
 - A GitHub issue is not required. If one exists, put its number in the branch name; otherwise drop the
   number and use `<type>/<slug>`. Never open an issue just to have one, and never invent a number.
 - **Never open a PR unless asked.** Finish the change, commit, and stop there — pushing the branch
   and opening the PR is the user's call. `/commit-and-pr` is that ask; so is "open a PR".
-- **Never merge a PR yourself.** Every PR needs an approving review from a code owner; open it
-  and leave the merge to a human.
-- **Rebase onto `development` before asking for a merge.** Required checks are strict: a PR whose base
-  has moved on is not mergeable until its checks have run against the tip. `git fetch origin && git rebase
-  origin/development`, then `git push --force-with-lease`.
-- `hotfix/<x.y.z>` off `main`. There is no `release/*` branch — **create-release** merges `development`
-  into `main` itself.
+- **Never merge a PR yourself.** Open it and leave the merge to a human.
+- **Rebase onto `main` before asking for a merge.** A PR whose base has moved on should have its
+  checks run against the tip. `git fetch origin && git rebase origin/main`, then
+  `git push --force-with-lease`.
+- There is no `release/*` branch and no `hotfix/*` branch. A hotfix is an ordinary `fix/` branch
+  PR'd into `main`, released by running **create-release** when it lands.
+- Only semantic-release writes to `main` without a PR: the tag, and the `chore(release): X.Y.Z
+  [skip ci]` manifest bump. That is why `main` carries no required status checks — a release commit
+  is created with `[skip ci]`, so no check could ever pass for it.
 
 ## Commits
 
@@ -80,6 +84,6 @@ Say so plainly rather than implying a green build or a green `test` means the ch
 
 ## Releasing
 
-Run the **create-release** workflow (`gh workflow run create-release.yml`, or `-f dry_run=true` to preview). Do not merge
-`development` into `main` by hand unless that workflow is broken — and never squash it if you do.
-Full runbook in [docs/RELEASING.md](docs/RELEASING.md).
+Run the **create-release** workflow (`gh workflow run create-release.yml`, or `-f dry_run=true` to preview).
+It releases whatever is on `main` at that moment, so releasing is a decision about timing, not about
+merging anything. Full runbook in [docs/RELEASING.md](docs/RELEASING.md).

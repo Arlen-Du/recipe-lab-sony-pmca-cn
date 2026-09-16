@@ -16,15 +16,15 @@ picked up.
 ## The short version
 
 ```
-issue  ──▶  branch off development  ──▶  PR  ──▶  squash merge
-                                         │
-                                         └── the PR title IS the commit, and
-                                             decides the next version number
+branch off main  ──▶  PR  ──▶  squash merge
+                       │
+                       └── the PR title IS the commit, and
+                           decides the next version number
 
-push to development  ──▶  dev-build  ──▶  rolling `dev` prerelease APK
+push to main  ──▶  dev-build  ──▶  rolling `dev` prerelease APK
 
-create-release (manual)  ──▶  merge into main  ──▶  semantic-release
-                                                    version, build, tag, publish
+create-release (manual)  ──▶  semantic-release on main
+                              version, build, tag main's tip, publish
 ```
 
 Nobody picks a version number: `fix:` makes a patch, `feat:` a minor, `!` a major, and

@@ -2,7 +2,7 @@
 # Prints the version semantic-release would publish next, e.g. 1.2.0
 #
 # Falls back to the manifest version when nothing releasable has landed since the last
-# tag, which is the common case early in a cycle. Used by dev-build so a development APK
+# tag, which is the common case early in a cycle. Used by dev-build so an in-progress APK
 # is labelled with the version it is heading towards rather than the one already shipped.
 #
 # Needs: npm ci, and GITHUB_TOKEN in the environment.
