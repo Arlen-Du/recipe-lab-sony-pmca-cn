@@ -109,6 +109,17 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           persist-credentials: true
+      # First, before anything reads the tree: main is the previous release, and need not
+      # carry package-lock.json or the toolchain pins at all. npm ci, the SDK install and the
+      # tests below all have to see what is about to ship, not what shipped last time.
+      - name: Merge development into main
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --no-tags origin development
+          # A merge commit, never a squash: main stays a strict superset of development.
+          git merge --no-ff FETCH_HEAD -m "chore(release): merge development"
+
       - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
@@ -125,16 +136,8 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
           "$SDKMANAGER" "build-tools;30.0.3" "platforms;android-28" "ndk;16.1.4479499"
 
-      - name: Merge development into main
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch --no-tags origin development
-          # A merge commit, never a squash: main stays a strict superset of development.
-          git merge --no-ff FETCH_HEAD -m "chore(release): merge development"
-
-      # On the merged tree and before anything is pushed: a release never ships what the
-      # tests reject, and a failure here leaves main untouched.
+      # Before anything is pushed: a release never ships what the tests reject, and a
+      # failure here leaves main untouched.
       - name: Run the unit tests
         run: ./tools/test.sh
 
