@@ -9,13 +9,13 @@ import android.view.View;
 public class HintBar extends View {
     public static final int RECIPE = 0, CHIPS = 1, EDIT = 2;
     private static final int[][] ICONS = {
-        { Legend.LEFTRIGHT, Legend.UPDOWN, Legend.FN, Legend.ENTER, Legend.TRASH, Legend.AEL, Legend.MENU },
-        { Legend.LEFTRIGHT, Legend.UPDOWN, Legend.ENTER, Legend.FN, Legend.TRASH, Legend.AEL, Legend.MENU },
-        { Legend.UPDOWN, Legend.ENTER, Legend.MENU } };
+        { Legend.FN, Legend.ENTER, Legend.ENTER, Legend.TRASH, Legend.AEL, Legend.MENU },
+        { Legend.ENTER, Legend.FN, Legend.TRASH, Legend.AEL, Legend.MENU },
+        { Legend.ENTER } };
     private static final String[][] TEXT = {
-        { "recipe", "params", "browse", "store", "factory", "hide", "exit" },
-        { "param", "recipe", "edit", "browse", "factory", "hide", "exit" },
-        { "value", "done", "done" } };
+        { "browse", "pick", "fav (hold)", "factory", "hide", "exit" },
+        { "edit", "browse", "factory", "hide", "exit" },
+        { "done" } };
 
     private final Legend legend;
     private int mode = RECIPE;

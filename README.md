@@ -201,16 +201,23 @@ Open **Recipe Lab** from the Application List. You get the live image with a pan
 |---|---|
 | **wheel** | scroll recipes, from anywhere — the live image changes at once, and that is what the camera will write |
 | **left / right**, **top dial** | scroll recipes too, but only on the recipe line; on the chip row they walk the chips |
-| **Fn** | open the brand list. Brands left, recipes right; left / right switches column (the active one is amber), wheel or up / down scrolls, centre picks |
-| **centre** | store the recipe you are looking at. A message confirms it |
+| **Fn** | open the brand list. **Favourites** first, then the brands, on the left; recipes on the right. Left / right switches column (the active one is amber), wheel or up / down scrolls, centre picks |
+| **centre** | pick the recipe you are looking at — the camera keeps it. A message confirms it |
+| **hold centre** | mark the recipe as a favourite, or unmark it. Works on the main screen and inside the brand list |
 | **AEL** | hide the panel — once for a small label, twice for nothing. The wheel still works |
 | **up / down** | move between the recipe line and the row of value chips |
-| **TRASH** | stage the factory look, then **centre** to store it |
+| **TRASH** | stage the factory look, then **centre** to pick it |
 | **shutter** | take a picture of what you are previewing |
 | **MENU** | leave the app |
 
 Then **turn the camera off and on**. The look is now the camera's default in every mode — P, A, S, M, movie — with
 the app closed, and the app reopens on that recipe.
+
+**Favourites.** Hold the **centre button** on a recipe and it joins the **Favourites** group at the top of the brand
+list, with a star next to its name; hold again to drop it. The group lists your picks in the order you marked them,
+and the brand list opens straight on it whenever the recipe you are on is one of them. The wheel on the main screen
+still walks all 77 — favourites shorten the list in the browser, not the scroll. The marks are kept by the app, not in
+the camera's settings, so they survive a power cycle but go with the app if you remove it.
 
 **The chips.** In the chip row, **left / right** walks the chips, **centre** focuses one (it turns amber),
 **up / down** changes its value, **centre** leaves it. The wheel keeps changing recipes throughout. A recipe only shows the chips it uses: **CS** recipes show style,
@@ -222,7 +229,7 @@ balance, EV and DRO are always there. The legend at the bottom of the screen fol
 | badge | meaning |
 |---|---|
 | **ACTIVE** | the camera already has these values |
-| **PREVIEW** | you are only looking; press **centre** to keep it |
+| **PREVIEW** | you are only looking; press **centre** to pick it |
 | **PROTECTED** | the camera is not accepting changes — see [Troubleshooting](#troubleshooting) |
 
 ## What it changes
@@ -242,7 +249,7 @@ recipe needs JPEG and you are on RAW does the app ask:
 Quality: RAW+JPG → JPG Fine — JPEG is needed to apply this recipe
 ```
 
-*Cancel* stores nothing.
+*Cancel* changes nothing.
 
 ## Uninstalling
 
@@ -260,10 +267,10 @@ without the app. It is not permanent in the sense of damage. Undo it any time, t
 
 - Some recipes push saturation further than the menu slider goes (the menu allows ±3, the camera accepts more). The
   menu then shows the nearest value it can; if you touch that slider it snaps back to the normal range and the
-  recipe loses that extra punch. Re-store from the app if that happens.
-- The preview inside the app is temporary; closing the app removes it. Only what you *stored* stays.
+  recipe loses that extra punch. Pick the recipe again in the app if that happens.
+- The preview inside the app is temporary; closing the app removes it. Only what you *picked* stays.
 - Built and tested on the A6000 with firmware 3.21. Other Sony bodies of the same generation probably keep these
-  settings in the same place, but nobody has checked — compare what the chips show with your menus before storing.
+  settings in the same place, but nobody has checked — compare what the chips show with your menus before picking a recipe.
 
 ## Troubleshooting
 
@@ -274,7 +281,7 @@ The common questions — RAW files, damage, LUTs, newer bodies — are in the **
 | `No devices found` | USB Connection must be *Mass Storage*; card inserted; camera on and showing *USB Mode*; try another cable or port |
 | Stuck at `Waiting for camera to switch...` | Unplug, turn the camera off and on, reconnect, run again |
 | Badge says **PROTECTED** | The camera's settings store is write-protected. Install [OpenMemories-Tweak](https://github.com/ma1co/OpenMemories-Tweak), turn off *Backup protection*, try again |
-| Look not applied after storing | Turn the camera off and on |
+| Look not applied after picking a recipe | Turn the camera off and on |
 | `no live preview: ...` in the panel | Something else is holding the camera; close and reopen the app |
 | Text shows `Â·` | Old build; install the APK from the [latest release](https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest) |
 

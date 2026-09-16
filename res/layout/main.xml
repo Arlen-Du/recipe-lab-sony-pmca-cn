@@ -58,6 +58,12 @@
                 android:textStyle="bold"
                 android:textColor="#DDFFFFFF"
                 android:background="@drawable/chip" />
+            <com.voxivoid.recipelab.StarView
+                android:id="@+id/fav"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:visibility="gone" />
             <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
             <TextView
                 android:id="@+id/count"
