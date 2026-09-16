@@ -149,6 +149,12 @@ jobs:
       - name: semantic-release
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          # semantic-release takes the current branch from GITHUB_REF, which is the ref the
+          # workflow was dispatched on -- not what this job checked out. Dispatched from the
+          # Actions tab on development (or with --ref development) it would see a branch its
+          # config does not publish from, and no-op *after* the merge had already been pushed,
+          # leaving main untagged. This job only ever releases main, so say so.
+          GITHUB_REF: refs/heads/main
           ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
