@@ -1,0 +1,300 @@
+# Development notes
+
+Reverse-engineering notes, the settings-store map, and how to build Recipe Lab.
+For using the app, see the [README](../README.md). For the branch/commit/release rules,
+see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
+**Contents**
+
+- [Source layout](#source-layout)
+- [Settings slots](#settings-slots)
+- [Exit rule](#exit-rule)
+- [Live preview](#live-preview)
+- [Developing on WSL](#developing-on-wsl)
+- [Building](#building)
+- [Unit tests](#unit-tests)
+- [Installing on the camera](#installing-on-the-camera)
+- [Versioning](#versioning)
+- [Adding recipes](#adding-recipes)
+
+---
+
+## Source layout
+
+```
+AndroidManifest.xml            package com.voxivoid.recipelab
+src/com/voxivoid/recipelab/
+  MainActivity.java            UI state, key handling, the camera (CameraEx via reflection), store + sync
+  Params.java                  the parameter rows: slot ids, store encodings, preview parameters, chip
+                               navigation, HUD strings — pure functions, no Android, covered by test/
+  Recipes.java                 the 77 recipes, brands, GROUP_START / GROUP_COUNT, table navigation
+  res/raw/ids.txt              every settings entry of 16 bytes or less, used by the C1 snapshot/diff tool
+  PickerView.java              Canvas-drawn brand browser
+  Legend.java                  Canvas-drawn key icons, fit-to-width (camera font has no symbol glyphs)
+  HintBar.java                 legend view under the panel (uses Legend)
+  NativeBackup.java            JNI: read / write / attr / sync / isProtected
+jni/jni.cpp                    Backup_read / Backup_write / Backup_sync_all via OpenMemories-Platform
+jni/platform/                  git submodule: ma1co/OpenMemories-Platform
+res/                           layout, shape drawables, launcher icon
+test/com/voxivoid/recipelab/   JUnit tests for Recipes and Params (see Unit tests)
+build.sh                       the build: ndk-build, aapt, javac, d8, zipalign, apksigner
+build.cmd                      the same seven steps on Windows
+tools/                         version computation, bumping, the unit tests, and the CI gates
+```
+
+## Settings slots
+
+Found by disassembling the camera app's parameter registration in `libObj.so`):
+
+| setting | id | notes |
+|---|---|---|
+| Creative Style | `0x01070175` | index in the runtime `color-mode-values` list (verified by menu diff: 1 standard, 2 vivid, 3 neutral, 6 mono, **14 sepia**). 13 is a style the menu never selected for us, so `Recipes.STYLE_NAMES[13]` is `null` and the chip skips it; 4..12 are still guessed from the runtime list order and each needs its own menu diff |
+| Contrast | `0x01070178` | signed byte |
+| Saturation | `0x01070187` | signed byte, core accepts ±16 |
+| Sharpness | `0x0107018a` | signed byte |
+| Picture Profile no. | `0x0107031c` | 0 off, 3 = alternate colour matrix (no gamma on this body) |
+| WB mode | `0x01070019` | 1 auto, 14 colour temperature |
+| WB Kelvin | `0x01070018` | Kelvin / 100 |
+| WB A-B / G-M | `0x01070017` / `0x01070016` + per-mode copies: AWB `0x0107067f` / `0x0107067e`, colour temp `0x01070683` / `0x01070682` | signed, magenta positive (menu G1 = 0xff). The camera applies the per-mode copy (verified end-to-end) |
+| Picture Effect | `0x010706f1` | index in `picture-effect-values` (verified: Retro = 4) |
+| Effect sub-setting | `0x010709d8` high-key tint · `0x010706f3` toy tone · `0x010706ee` partial-colour hue · `0x010706ef` posterization | index in the runtime value list (high-key tint verified) |
+| Exposure bias | `0x010700b8` + copy `0x01070c7f` | 1/3 EV steps, signed (verified: +0.7 = 2); both written |
+| DRO | `0x01070104` (+ level byte `0x01070775`) | Off 0, Auto 1, Lv1–5 = 2–6; level byte 1 for Off/Auto, Lv n = n+1 (verified) |
+| Quality: file format | `0x01070013` (+ mirror `0x01070aa9`) | RAW = 1, RAW+JPEG = 2, JPEG = 0 (verified) |
+| Quality: JPEG level | `0x01070014` (+ mirror `0x01070aaa`) | Std = 0, Fine = 1 (verified) |
+
+## Snapshot / diff tool (C1)
+
+How the slots above were found, and how to find the next one. **C1** in the app runs `snapshotOrDiff()`, over every
+id in `res/raw/ids.txt` (each settings entry of 16 bytes or less):
+
+1. **First press** writes `snapshot.bin` into `getFilesDir()` — the current value of every id.
+2. Leave the app, change **one** thing in the camera menus, reopen.
+3. **Second press** re-reads every id, diffs it against the snapshot, shows the changed ones as
+   `id:old>new` (first 14 on screen), appends the same line to `diff.txt` in `getFilesDir()`, and deletes
+   `snapshot.bin` — so the next press starts a fresh snapshot.
+
+Whatever shows up is the slot for the menu item you changed. Change one thing at a time or the diff is useless:
+the camera rewrites unrelated entries on its own, so a second change means guessing which id belongs to what.
+
+Note the toast still says "press Fn again" — the handler is on `K_C1`. The string is wrong, not the binding.
+
+## Exit rule
+
+The camera writes some live parameters (exposure bias, WB fine-tune) straight back into the settings
+store, so on exit the app sets the live parameters to the *stored* values rather than to its launch snapshot —
+otherwise a freshly stored recipe would be undone the moment the app closes.
+
+## Live preview
+
+Goes through `Camera.Parameters`: `color-mode`, `saturation`, `contrast`, `sharpness`,
+`whitebalance`, `color-temperture-white-balance`, `light-balance-for-white-balance`,
+`color-compensation-for-white-balance`, `rgb-matrix` (Q10, 1.0 = 1024) + `rgb-matrix-mode`, `picture-effect`,
+`exposure-compensation` (1/3 EV steps), `dro-mode` + `dro-level`.
+**Key scan codes:** wheel 522 / 523, top dial 525 / 526, AEL 532, C1 622, Fn 520, trash 595, centre 232, MENU 514.
+
+## Developing on WSL
+
+This is how the machine is set up: everything except talking to the camera happens inside WSL.
+
+**Keep the repository on the Linux filesystem** — `~/code/...`, never `/mnt/c/...`. Windows
+drives are reached over the 9p protocol, where each file operation costs milliseconds instead
+of microseconds. A build does thousands of them, so the difference is seconds versus minutes,
+and every git command crawls.
+
+Where things live:
+
+| | |
+|---|---|
+| `~/toolchains/jdk17` | JDK 17 (Temurin) |
+| `~/Android/Sdk` | build-tools 30.0.3, platform-28, NDK r16b |
+| `~/.keys/recipelab-release.keystore` | the signing key, `chmod 600` |
+| `~/code/sony-pmca-re` | Sony-PMCA-RE — dumps, the updater shell, installing |
+| `~/code/a6000-dumps` | firmware and settings-store dumps |
+| `~/code/pmca-scripts` | camera helper scripts |
+
+Worth putting in `~/.bashrc`:
+
+```bash
+export JAVA_HOME=$HOME/toolchains/jdk17
+export ANDROID_SDK=$HOME/Android/Sdk
+export ANDROID_NDK=$ANDROID_SDK/ndk/16.1.4479499
+export PATH="$HOME/.local/bin:$PATH"      # gh lives here
+export BROWSER=wsl-browser                # so `gh auth login` opens Windows Firefox
+```
+
+To build with the project key instead of a throwaway one:
+
+```bash
+export ANDROID_KEYSTORE_B64="$(base64 -w0 ~/.keys/recipelab-release.keystore)"
+export ANDROID_KEYSTORE_PASSWORD=android
+export ANDROID_KEY_ALIAS=probe
+export ANDROID_KEY_PASSWORD=android
+```
+
+An APK signed with a different key **cannot be installed over an existing Recipe Lab** — the
+app has to be removed first — so use these whenever you are updating a camera that already
+has it.
+
+`npm ci` is only needed for the release tooling (semantic-release, `tools/next-version.sh`).
+No JavaScript ships in the APK.
+
+### Things that bite
+
+- **`apksigner` and `keytool` exec `java` from `PATH`**, so `JAVA_HOME` on its own is not
+  enough; `build.sh` prepends `$JAVA_HOME/bin` for exactly this. Without it, step 6 fails with
+  `exec: java: not found`.
+- **`BROWSER` is word-split**, so a path containing spaces cannot be used directly.
+  `~/.local/bin/wsl-browser` is a two-line wrapper that quotes the Windows Firefox path.
+- **`sudo` prompts for a password**, so anything needing root — usbip tools, udev rules —
+  cannot be scripted unattended.
+- **The camera is invisible from WSL.** See [Installing on the camera](#installing-on-the-camera).
+
+## Building
+
+Toolchain, both platforms: **JDK 17**, Android SDK **build-tools 30.0.3** with a platform jar (**API 28**), and
+**NDK r16b** — the last NDK with the GCC toolchain this Android 2.3.7 target needs. `jni/Application.mk` pins
+`APP_ABI := armeabi`, `APP_STL := stlport_static`, `APP_PLATFORM := android-14`, `NDK_TOOLCHAIN_VERSION := 4.9`;
+that combination is what rules out every later NDK.
+
+```
+git clone --recursive https://github.com/voxivoid/recipe-lab-sony-pmca.git
+cd recipe-lab-sony-pmca
+```
+
+**Linux / WSL / macOS** — `build.sh`. This is what CI runs and the supported way to build:
+
+```bash
+export JAVA_HOME=$HOME/toolchains/jdk17
+export ANDROID_SDK=$HOME/Android/Sdk
+export ANDROID_NDK=$ANDROID_SDK/ndk/16.1.4479499
+./build.sh                 # X.Y.Z-dev.N
+RELEASE=1 ./build.sh       # X.Y.Z — the tag must match the manifest
+```
+
+Setting the toolchain up from nothing, no root required:
+
+```bash
+# JDK 17
+curl -sL -o jdk.tar.gz "https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/eclipse"
+mkdir -p ~/toolchains/jdk17 && tar xzf jdk.tar.gz -C ~/toolchains/jdk17 --strip-components=1
+
+# Android cmdline-tools, then the three packages
+curl -sL -o cmdline.zip "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+mkdir -p ~/Android/Sdk/cmdline-tools && unzip -q cmdline.zip -d /tmp/ct
+mv /tmp/ct/cmdline-tools ~/Android/Sdk/cmdline-tools/latest
+yes | ~/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null
+~/Android/Sdk/cmdline-tools/latest/bin/sdkmanager \
+  "build-tools;30.0.3" "platforms;android-28" "ndk;16.1.4479499"
+```
+
+About 3 GB installed. `build.cmd` is the Windows equivalent and is kept in step with
+`build.sh`, but the toolchain it needs is no longer installed on this machine.
+
+To sign with the project key rather than a throwaway one, set
+`ANDROID_KEYSTORE_B64` (`base64 -w0 <keystore>`), `ANDROID_KEYSTORE_PASSWORD`,
+`ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` — the same four values CI holds as secrets.
+
+Both scripts park the platform's `errno.h` shim (updater-only, it shadows the NDK header), then run ndk-build,
+aapt, javac (`-encoding UTF-8`), d8 (invoked as `java -cp d8.jar`, because `d8.bat` uses whatever Java is on
+PATH), zipalign and apksigner — **v1 signing only**, since the camera does not understand v2/v3.
+`build.sh` restores `errno.h` from an `EXIT` trap, so an aborted build never leaves the submodule dirty.
+
+**Signing.** With no keystore configured, both scripts generate a throwaway key. An APK signed with a
+different key **cannot be installed over an existing one** — the camera would need the app removed first.
+CI therefore signs with the project key, held as the `ANDROID_KEYSTORE_B64` repo secret; set the same four
+`ANDROID_KEYSTORE_*` variables locally if you need a build that updates an existing install in place.
+
+## Unit tests
+
+```bash
+export JAVA_HOME=$HOME/toolchains/jdk17
+./tools/test.sh              # everything
+./tools/test.sh Writes       # only test classes whose name contains "Writes"
+```
+
+That is the whole of the `test` CI job on work branches; `dev-build` runs the same script before every
+development build and `create-release` before anything is pushed to `main`. It needs a JDK 17 and nothing else: `Recipes.java` and `Params.java`
+are compiled against the bare JDK — no `android.jar`, no NDK — then the tests under `test/` are compiled and run
+with the JUnit 5 console launcher, one jar fetched from Maven Central into `out/test/` on first use and checked
+against a SHA-256 pinned in the script (`JUNIT_JAR=<path>` points it at a copy when offline). Reports land in
+`out/test/reports/`.
+
+**What is covered.** Everything that decides without the camera lives in `Params` and `Recipes`, and the tests
+pin it down:
+
+| | |
+|---|---|
+| `RecipesTest` | the table itself — 77 recipes, group order, every value inside its row's range, kelvin in whole hundreds, sub-parameters that exist for the effect; labels, `summary()`, wrap-around navigation |
+| `ParamsCodecTest` | how the store encodes each row (DRO bytes, PP3 for the matrix, magenta-positive G-M, the quality pair, signed vs unsigned slots) and how it reads back |
+| `ParamsWritesTest` | which bytes ENTER writes for a recipe — golden lists for a few, and every recipe stored over a factory camera, then on top of each other, read back through the same decoder |
+| `ParamsPreviewTest` | the `Camera.Parameters` the live preview sets, recipe by recipe |
+| `ParamsChipsTest` | chip visibility, stepping (wrap vs clamp, the effect → SUB / quality side effects), LEFT/RIGHT and UP/DOWN landing spots, chip text |
+| `ParamsHudTest` | the meta line, the minimal pill, the quality prompt |
+| `ParamsToolsTest` | the C1 tool's id list — including that `res/raw/ids.txt` is well formed and lists every slot the app writes — and its diff lines |
+
+**What is not, and cannot be.** `MainActivity` (key dispatch, overlays, the camera and the JNI store), the
+Canvas views (`PickerView`, `PromptView`, `HintBar`, `Legend`) and `jni/jni.cpp` need a running camera or an
+Android runtime; there is no Gradle and no Robolectric here, and a mock of `CameraEx` would prove nothing. Those
+stay on the [on-camera checklist](CONTRIBUTING.md#on-the-camera). Likewise the slot ids themselves: a
+test can show that the app writes `0x01070175 = 6`, not that the camera means B&W by it.
+
+**Keeping it that way.** New logic that does not need the camera goes into `Params` (or `Recipes`) with a test
+next to it, and is called from `MainActivity`, never the other way round. `tools/test.sh` compiles the two
+without `android.jar` on purpose: an `android.*` import in either fails there before it fails in CI. Tests
+are plain JUnit 5 (`org.junit.jupiter.api`), one behaviour per method, no mocking library; `Fixtures` has a
+factory-fresh camera as rows and as store bytes and a fake store to write into.
+
+### Installing on the camera
+
+**Build in WSL, install from Windows.** WSL2 is a VM with no USB controller, so the camera is
+only reachable from the Windows side. Everything else — building, dumps, git, releases — is
+WSL-native.
+
+```bash
+./build.sh                              # in the repo
+~/code/pmca-scripts/install-to-camera.sh   # copies the APK over and drives Sony-PMCA-RE
+```
+
+The camera must be on, with `Setup → USB Connection` set to **Mass Storage**. The script
+uses the Windows Python at
+`C:\Users\voxiv\AppData\Local\Programs\Python\Python311\python.exe` against the
+Sony-PMCA-RE checkout at `C:\Users\voxiv\pmca\src`; those two are the only things this
+project still needs on Windows.
+
+If you would rather install from inside WSL as well, `~/code/pmca-scripts/setup-usb-wsl.sh`
+sets up the Linux half of USB forwarding (usbip tools, the `054c` udev rule, pyusb). The
+Windows half is `usbipd-win`: `winget install dorssel.usbipd-win` once from an Administrator
+PowerShell, `usbipd bind --busid <id>` once per camera, then `usbipd.exe attach --wsl --busid
+<id>` after each replug. Forwarding a USB device needs a Windows-side driver either way —
+that part cannot be removed.
+
+## Versioning
+
+`AndroidManifest.xml` `android:versionName` is the **single source of truth**, and always holds the *next
+target release* (`X.Y.Z`, no suffix). Nothing else stores a version — not the README, not the Java source.
+
+```
+versionCode = MAJOR*10_000_000 + MINOR*100_000 + PATCH*1_000 + P
+P = N    dev prerelease, N = commits since the last v* tag (1..998)
+P = 999  release
+```
+
+`999` makes a release outrank every prerelease before it, so `1.1.0` installs cleanly over `1.1.0-dev.42`
+instead of being refused as a downgrade.
+
+| script | does |
+|---|---|
+| `tools/version.sh` | computes `VERSION_NAME` / `VERSION_CODE` for a build; sourced by `build.sh` |
+| `tools/bump-version.sh <x.y.z>` | opens the next cycle — the only way a version is ever typed |
+| `tools/check-version.sh` | CI gate: manifest is consistent and no version mirror has crept back in |
+| `tools/dev-notes.js <version>` | prints the notes for a dev build from the commits since the last `v*` tag, using the same semantic-release generator and preset as a release |
+
+A build never mutates the checked-in manifest; it writes `out/AndroidManifest.xml` and points `aapt` there.
+
+## Adding recipes
+
+Adding a recipe is one line in `Recipes.java` inside its brand block. Adding a brand is a new entry in `GROUPS` plus
+a block of recipes.
