@@ -54,6 +54,7 @@ trap restore_errno EXIT
 [ -e jni/platform/errno.h ] && mv -f jni/platform/errno.h jni/platform/errno.h.updater_only
 
 # ---- version (single source of truth: AndroidManifest.xml, never mutated by a build) ----
+: "${RELEASE:=1}"
 # shellcheck source=tools/version.sh
 . tools/version.sh
 echo "building $VERSION_NAME (versionCode $VERSION_CODE)"

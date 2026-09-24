@@ -70,7 +70,11 @@ public class MenuView extends View {
             item.setColor(on ? INK : 0xFFFFFFFF);
             c.drawText(labels[i], pad, y + 15 * d, item);
             small.setColor(on ? 0xCC1A1208 : 0x99FFFFFF);
+            float avail = w - 2 * pad;
+            float tw = small.measureText(details[i]);
+            if (tw > avail && tw > 0) small.setTextSize(Math.max(7 * d, 10 * d * (avail / tw)));
             c.drawText(details[i], pad, y + 27 * d, small);
+            small.setTextSize(10 * d);
         }
         c.drawLine(pad, y + 2 * d, w - pad, y + 2 * d, rule);
         legend.draw(c, pad, y + 12 * d + legend.height() / 2 - 2 * d, w - 2 * pad, LEGEND_ICONS, I18n.t(LEGEND_TEXT));

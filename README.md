@@ -18,10 +18,10 @@
     src="https://img.shields.io/badge/Sponsor_this_project-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white&style=for-the-badge"
     alt="Sponsor this project"></a>
 </p>
-
+s for
 <p align="center">
   <sub>
-    The app is free and stays free. Sponsoring pays for keeping it maintained, for building new features, and for
+    The app is free and stays free. Sponsoring pay keeping it maintained, for building new features, and for
     buying the cameras it has to be tested on — every body beyond the A6000 is one someone has to own.
   </sub>
 </p>
