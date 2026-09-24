@@ -35,7 +35,11 @@ public class PromptView extends View {
     }
 
     public void set(String titleText, String bodyText, String[] options, int selected, String noteText) {
-        this.titleText = titleText; this.bodyText = bodyText; this.options = options; this.selected = selected; this.noteText = noteText;
+        this.titleText = titleText;
+        this.bodyText = I18n.tQualityPromptDetail(bodyText);
+        this.options = I18n.t(options);
+        this.selected = selected;
+        this.noteText = I18n.t(noteText);
         invalidate();
     }
 
@@ -76,6 +80,6 @@ public class PromptView extends View {
             while (note.measureText(noteText) > avail && ns > 7 * d) { ns -= 0.5f * d; note.setTextSize(ns); }
             c.drawText(noteText, pad, y, note); note.setTextSize(10 * d); y += 14 * d;
         }
-        legend.draw(c, pad, y + legend.height() / 2 - 2 * d, w - 2 * pad, LEGEND_ICONS, LEGEND_TEXT);
+        legend.draw(c, pad, y + legend.height() / 2 - 2 * d, w - 2 * pad, LEGEND_ICONS, I18n.t(LEGEND_TEXT));
     }
 }

@@ -32,6 +32,6 @@ public class HintBar extends View {
 
     @Override
     protected void onDraw(Canvas c) {
-        legend.draw(c, 0, getHeight() / 2f, getWidth(), ICONS[mode], TEXT[mode]);
+        legend.draw(c, 0, getHeight() / 2f, getWidth(), ICONS[mode], I18n.t(TEXT[mode]));
     }
 }

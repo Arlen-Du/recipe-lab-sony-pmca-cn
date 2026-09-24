@@ -132,7 +132,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             lp.rightMargin = dp(5);
             c.setLayoutParams(lp);
-            TextView l = new TextView(this); l.setTextSize(9); l.setText(ROW_NAME[i]);
+            TextView l = new TextView(this); l.setTextSize(9); l.setText(I18n.tRow(ROW_NAME[i]));
             TextView v = new TextView(this); v.setTextSize(13); v.setTypeface(Typeface.DEFAULT_BOLD); v.setSingleLine(true);
             c.addView(l); c.addView(v);
             chips.addView(c);
@@ -504,7 +504,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
     // ------------------------------------------------------------ UI
     private void showToast(String msg, int ms) {
-        toast.setText(msg); toast.setVisibility(View.VISIBLE);
+        toast.setText(I18n.tToast(msg)); toast.setVisibility(View.VISIBLE);
         handler.removeCallbacks(hideToast);
         if (ms > 0) handler.postDelayed(hideToast, ms);
     }
@@ -524,16 +524,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             tag.setText(edit[R_PE] != 0 ? "PE" : "CS");
             tag.setTextColor(edit[R_PE] != 0 ? ACCENT : 0xDDFFFFFF);
             fav.setVisibility(favs.contains(recipe) ? View.VISIBLE : View.GONE);
-            if (dirty) { badge.setText("PREVIEW"); badge.setBackgroundResource(R.drawable.badge_warn); }
-            else { badge.setText("ACTIVE"); badge.setBackgroundResource(R.drawable.badge_ok); }
-            meta.setText(Params.metaLine(cur, edit, previewOk ? null : previewErr));
+            if (dirty) { badge.setText(I18n.t("PREVIEW")); badge.setBackgroundResource(R.drawable.badge_warn); }
+            else { badge.setText(I18n.t("ACTIVE")); badge.setBackgroundResource(R.drawable.badge_ok); }
+            meta.setText(I18n.tMetaLine(Params.metaLine(cur, edit, previewOk ? null : previewErr)));
             for (int i = 1; i < N; i++) {
                 chip[i].setVisibility(rowVisible(i) ? View.VISIBLE : View.GONE);
                 boolean sel = i == row, ch = rowDirty(i), foc = sel && focus;
                 chip[i].setBackgroundResource(foc ? R.drawable.chip_sel : sel ? R.drawable.chip_hi : R.drawable.chip);
                 chipLabel[i].setTextColor(foc ? INK : sel ? ACCENT : DIM);
                 chipValue[i].setTextColor(foc ? INK : ch ? ACCENT : WHITE);
-                chipValue[i].setText(Params.fmt(i, edit[i], edit));
+                chipValue[i].setText(I18n.t(Params.fmt(i, edit[i], edit)));
             }
             if (row == 0) chipScroll.post(new Runnable() { public void run() { chipScroll.smoothScrollTo(0, 0); } });
             else {
@@ -546,7 +546,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             hints.setMode(row == 0 ? HintBar.RECIPE : focus ? HintBar.EDIT : HintBar.CHIPS);
         } else if (overlay == OV_PILL) {
             panel.setVisibility(View.GONE); mini.setVisibility(View.VISIBLE);
-            mini.setText(Params.miniLine(recipe, cur, edit, dirty));
+            mini.setText(I18n.tMiniLine(Params.miniLine(recipe, cur, edit, dirty)));
         } else {
             panel.setVisibility(View.GONE); mini.setVisibility(View.GONE);
         }

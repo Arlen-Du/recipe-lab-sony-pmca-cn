@@ -36,7 +36,13 @@ public class MenuView extends View {
 
     /** the rows, their explanation lines, and which one is highlighted */
     public void set(String[] labels, String[] details, int selected) {
-        this.labels = labels; this.details = details; this.selected = selected;
+        this.labels = new String[labels.length];
+        this.details = new String[details.length];
+        for (int i = 0; i < labels.length; i++) {
+            this.labels[i] = I18n.tMenuLabel(i, labels[i]);
+            this.details[i] = I18n.tMenuDetail(details[i]);
+        }
+        this.selected = selected;
         requestLayout(); invalidate();
     }
 
@@ -44,7 +50,7 @@ public class MenuView extends View {
 
     @Override
     protected void onMeasure(int w, int hh) {
-        float wd = head.measureText(DevTools.TITLE);
+        float wd = head.measureText(I18n.t(DevTools.TITLE));
         for (int i = 0; i < labels.length; i++) wd = Math.max(wd, Math.max(item.measureText(labels[i]), small.measureText(details[i])));
         wd = Math.min(wd + 40 * d, MeasureSpec.getSize(w));
         float h = 14 * d + 12 * d + labels.length * rowHeight() + 12 * d + legend.height() + 12 * d;
@@ -55,7 +61,7 @@ public class MenuView extends View {
     protected void onDraw(Canvas c) {
         float w = getWidth(), h = getHeight(), pad = 16 * d;
         r.set(0, 0, w, h); c.drawRoundRect(r, 8 * d, 8 * d, bg); c.drawRoundRect(r, 8 * d, 8 * d, edge);
-        c.drawText(DevTools.TITLE, pad, 14 * d + 7 * d, head);
+        c.drawText(I18n.t(DevTools.TITLE), pad, 14 * d + 7 * d, head);
 
         float y = 14 * d + 12 * d, rh = rowHeight();
         for (int i = 0; i < labels.length; i++, y += rh) {
@@ -67,6 +73,6 @@ public class MenuView extends View {
             c.drawText(details[i], pad, y + 27 * d, small);
         }
         c.drawLine(pad, y + 2 * d, w - pad, y + 2 * d, rule);
-        legend.draw(c, pad, y + 12 * d + legend.height() / 2 - 2 * d, w - 2 * pad, LEGEND_ICONS, LEGEND_TEXT);
+        legend.draw(c, pad, y + 12 * d + legend.height() / 2 - 2 * d, w - 2 * pad, LEGEND_ICONS, I18n.t(LEGEND_TEXT));
     }
 }

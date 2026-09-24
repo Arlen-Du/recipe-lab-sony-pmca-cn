@@ -62,9 +62,9 @@ public class PickerView extends View {
         float top = pad + 12 * d, bottom = h - pad - 20 * d;    // header / footer reserved
         float sbW = 4 * d;                                      // scrollbar width
         head.setColor(column == 0 ? ACCENT : 0x99FFFFFF);
-        c.drawText("BRAND", pad, pad + 7 * d, head);
+        c.drawText(I18n.t("BRAND"), pad, pad + 7 * d, head);
         head.setColor(column == 1 ? ACCENT : 0x99FFFFFF);
-        c.drawText(Favourites.groupName(g).toUpperCase() + "  ·  " + count, colX + pad, pad + 7 * d, head);
+        c.drawText(I18n.t(Favourites.groupName(g)).toUpperCase() + "  ·  " + count, colX + pad, pad + 7 * d, head);
         head.setColor(0x99FFFFFF);
         c.drawLine(colX, pad, colX, h - pad, rule);
         c.drawLine(pad, top + 3 * d, w - pad, top + 3 * d, rule);
@@ -84,7 +84,7 @@ public class PickerView extends View {
             item.setColor(active ? INK : on ? ACCENT : gi == Favourites.GROUP ? 0xFFF2B85C : 0xCCFFFFFF); item.setFakeBoldText(on);
             float tx = pad;
             if (gi == Favourites.GROUP) { star.setColor(active ? INK : ACCENT); Legend.star(c, pad + 5 * d, y + rowH / 2, 5.5f * d, star); tx += 14 * d; }
-            c.drawText(Favourites.groupName(gi), tx, y + rowH / 2 + item.getTextSize() * 0.36f, item);
+            c.drawText(I18n.t(Favourites.groupName(gi)), tx, y + rowH / 2 + item.getTextSize() * 0.36f, item);
             small.setColor(active ? 0xAA1A1208 : 0x66FFFFFF);
             String n = String.valueOf(Favourites.groupCount(gi, favs));
             c.drawText(n, gRight - 6 * d - small.measureText(n), y + rowH / 2 + small.getTextSize() * 0.36f, small);
@@ -97,9 +97,9 @@ public class PickerView extends View {
         float x = colX + pad;
         if (count == 0) {                                       // an empty Favourites group says so, and how to fill it
             item.setColor(0xCCFFFFFF);
-            c.drawText(Favourites.EMPTY_TITLE, x, listTop + 20 * d, item);
+            c.drawText(I18n.t(Favourites.EMPTY_TITLE), x, listTop + 20 * d, item);
             small.setColor(0x99FFFFFF);
-            c.drawText(Favourites.EMPTY_HINT, x, listTop + 36 * d, small);
+            c.drawText(I18n.t(Favourites.EMPTY_HINT), x, listTop + 36 * d, small);
         } else {
             float rh = 26 * d;
             int visible = Math.max(1, (int) (listH / rh));
@@ -126,7 +126,7 @@ public class PickerView extends View {
 
         // ---- footer: icon legend
         c.drawLine(pad, h - pad - 16 * d, w - pad, h - pad - 16 * d, rule);
-        legend.draw(c, pad, h - pad - 6 * d, w - 2 * pad, column == 0 ? BRAND_ICONS : RECIPE_ICONS, column == 0 ? BRAND_TEXT : RECIPE_TEXT);
+        legend.draw(c, pad, h - pad - 6 * d, w - 2 * pad, column == 0 ? BRAND_ICONS : RECIPE_ICONS, column == 0 ? I18n.t(BRAND_TEXT) : I18n.t(RECIPE_TEXT));
     }
 
     /** a small pill ending at {@code right} on the row at {@code y}; returns its left edge */

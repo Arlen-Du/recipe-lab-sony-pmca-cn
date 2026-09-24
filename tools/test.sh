@@ -29,6 +29,7 @@ UNITS=(
   src/com/voxivoid/recipelab/Params.java
   src/com/voxivoid/recipelab/Favourites.java
   src/com/voxivoid/recipelab/DevTools.java
+  src/com/voxivoid/recipelab/I18n.java
 )
 
 mkdir -p out/test
@@ -54,8 +55,13 @@ find test -name '*.java' | sort > out/test/sources.txt
 "$JAVA/javac" -encoding UTF-8 --release 8 -Xlint:-options -cp "out/test/classes:$JUNIT_JAR" -d out/test/test-classes "@out/test/sources.txt"
 
 echo "[3/3] junit"
-FILTER=()
-[ -n "${1:-}" ] && FILTER=(--include-classname ".*$1.*")
-"$JAVA/java" -jar "$JUNIT_JAR" execute \
-  --class-path "out/test/classes:out/test/test-classes" --scan-class-path \
-  --reports-dir out/test/reports --details=tree --disable-banner --fail-if-no-tests "${FILTER[@]}"
+if [ -n "${1:-}" ]; then
+  "$JAVA/java" -jar "$JUNIT_JAR" execute \
+    --class-path "out/test/classes:out/test/test-classes" --scan-class-path \
+    --reports-dir out/test/reports --details=tree --disable-banner --fail-if-no-tests \
+    --include-classname ".*$1.*"
+else
+  "$JAVA/java" -jar "$JUNIT_JAR" execute \
+    --class-path "out/test/classes:out/test/test-classes" --scan-class-path \
+    --reports-dir out/test/reports --details=tree --disable-banner --fail-if-no-tests
+fi
