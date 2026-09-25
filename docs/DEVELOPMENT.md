@@ -173,6 +173,8 @@ Goes through `Camera.Parameters`: `color-mode`, `saturation`, `contrast`, `sharp
 `color-compensation-for-white-balance`, `rgb-matrix` (Q10, 1.0 = 1024) + `rgb-matrix-mode`, `picture-effect`,
 `exposure-compensation` (1/3 EV steps), `dro-mode` + `dro-level`.
 **Key scan codes:** wheel 522 / 523, top dial 525 / 526, AEL 532, C1 622, Fn 520, trash 595, centre 232, MENU 514.
+Where AEL is a button behind the AF/MF lever rather than a button of its own it delivers a code of its own: the
+ILCE-7M2 sends **638** with the lever on AEL (`K_AEL_LEVER`), bound next to `K_AEL`.
 
 ## Centre button hold
 

@@ -46,6 +46,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private static final int K_UP = 103, K_DOWN = 108, K_LEFT = 105, K_RIGHT = 106, K_ENTER = 232, K_MENU = 514, K_SK1 = 229,
             K_DELETE = 595, K_SK2 = 513, K_PLAY = 207, K_DISP = 608, K_FN = 520, K_AEL = 532, K_C1 = 622, K_S1 = 516, K_S2 = 518,
             K_WHEEL_CW = 522, K_WHEEL_CCW = 523, K_DIAL_CW = 525, K_DIAL_CCW = 526;
+    /** what the AEL button delivers on a body whose AEL sits on the AF/MF lever — with the lever on AEL, ILCE-7M2 sends this, not K_AEL */
+    private static final int K_AEL_LEVER = 638;
+    /**
+     * Diagnostic, off: show the scan code of a key the app does not bind, which is how a body that delivers a
+     * key differently (ILCE-7M2 sends 638 for AEL) is found. Turn it on to probe a body, then off again.
+     */
+    private static final boolean KEY_PROBE = false;
 
     private static final int ACCENT = 0xFFF2B85C, INK = 0xFF1A1208, WHITE = 0xFFFFFFFF, DIM = 0x99FFFFFF;
     /** how long the centre button is held before it means "favourite" instead of "pick" */
@@ -85,6 +92,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private Object cameraEx; private Camera camera; private String origFlat;
     private int row = 0, recipe = 0, overlay = OV_FULL;   // Params.OV_*: the full panel, the pill, nothing, the browser
     private boolean focus = false;                        // a chip is focused: UP/DOWN change its value
+    private boolean overlayKeyHeld = false;               // AEL / DISP: the press has been handled, so its release must not step the cycle again
     private int browserCol = COL_RECIPES;                 // browser: Params.COL_GROUPS or COL_RECIPES
     private int browserGroup = 0;                     // browser: the group the brand column is on — Favourites.GROUP or a brand
     private int lastChip = 0;                         // chip to return to when leaving the recipe line
@@ -138,6 +146,44 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             chips.addView(c);
             chip[i] = c; chipLabel[i] = l; chipValue[i] = v;
         }
+    }
+
+    /**
+     * Two chips at the same width. The effect chip's value changes with the staged effect (复古 / HDR / 黑白 …) and a
+     * short one would sit narrower than its neighbour, shifting the row as the effect cycles; both are measured from
+     * their own content and both are given the wider of the two, so they always read the same whatever the effect is.
+     */
+    private void evenChipWidths(int a, int b) {
+        if (chip[a].getVisibility() != View.VISIBLE || chip[b].getVisibility() != View.VISIBLE) return;
+        int w = Math.max(naturalChipWidth(a), naturalChipWidth(b));
+        if (chip[a].getMinimumWidth() != w) chip[a].setMinimumWidth(w);
+        if (chip[b].getMinimumWidth() != w) chip[b].setMinimumWidth(w);
+    }
+
+    /**
+     * Room for the glyphs. The camera's CJK font reports a character a little narrower than it draws it (measured on
+     * the body: 古 is reported 20 px and drawn ~24.5 px at the chip's value size), and a TextView clips its text at
+     * its own padding box — so a text sized to the reported width loses the last stroke of its last character on the
+     * right. The minimum width gives every text a few dp of slack; without it, widening the chip around the text
+     * changes nothing, because the cut happens inside the TextView, not at the chip.
+     */
+    private void slackText(TextView t) {
+        if (t == null || t.getText() == null || t.getText().length() == 0) return;
+        int w = (int) Math.ceil(t.getPaint().measureText(t.getText().toString())) + dp(4);
+        if (t.getMinimumWidth() != w) t.setMinimumWidth(w);
+    }
+
+    /** the width a chip asks for: its widest child (label or value) plus its own padding */
+    private int naturalChipWidth(int i) {
+        View c = chip[i];
+        int w = 0, spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        LinearLayout box = (LinearLayout) c;
+        for (int k = 0; k < box.getChildCount(); k++) {
+            View child = box.getChildAt(k);
+            child.measure(spec, spec);
+            w = Math.max(w, child.getMeasuredWidth());
+        }
+        return w + c.getPaddingLeft() + c.getPaddingRight();
     }
 
     @Override
@@ -534,7 +580,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                 chipLabel[i].setTextColor(foc ? INK : sel ? ACCENT : DIM);
                 chipValue[i].setTextColor(foc ? INK : ch ? ACCENT : WHITE);
                 chipValue[i].setText(I18n.tChipValue(Params.fmt(i, edit[i], edit)));
+                slackText(chipLabel[i]); slackText(chipValue[i]);   // every text keeps room for the last stroke
             }
+            evenChipWidths(R_PE, R_WBMODE);                      // the effect chip reads as wide as WB, whatever effect is staged
             if (row == 0) chipScroll.post(new Runnable() { public void run() { chipScroll.smoothScrollTo(0, 0); } });
             else {
                 final View c = chip[row];
@@ -614,7 +662,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             case K_DOWN: case K_WHEEL_CW: case K_DIAL_CW: if (browserCol == COL_GROUPS) nextGroup(+1); else nextInGroup(+1); return true;
             case K_LEFT: case K_RIGHT: if (browserCol == COL_RECIPES) { browserCol = COL_GROUPS; render(); } else enterRecipeColumn(); return true;
             case K_MENU: case K_SK1: swallowMenuUp = true; openBrowser(false); return true;
-            case K_FN: case K_AEL: case K_DISP: openBrowser(false); return true;
+            case K_FN: case K_AEL: case K_AEL_LEVER: case K_DISP: overlayKeyHeld = true; openBrowser(false); return true;   // closes the browser; its release must not step the cycle
             case K_C1: openMenu(); return true;
             case K_DELETE: case K_SK2: stageFactory(); return true;
             case K_S1: try { camera.autoFocus(null); } catch (Throwable t) {} return true;
@@ -683,7 +731,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                 if (focus) stepValue(e.getScanCode() == K_UP ? +1 : -1); else toggleLine();
                 return true;
             }
-            case K_AEL: case K_DISP: overlay = (overlay + 1) % 3; render(); return true;   // full → pill → hidden; the browser is not in the cycle
+            case K_AEL: case K_AEL_LEVER: case K_DISP: return cycleOverlay(true, e);   // full → pill → hidden; the browser is not in the cycle
             case K_FN: openBrowser(true); return true;
             case K_C1: openMenu(); return true;
             case K_DELETE: case K_SK2: stageFactory(); return true;
@@ -693,6 +741,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             case K_PLAY: return true;
         }
         if (keyCode == KeyEvent.KEYCODE_BACK) { finish(); return true; }
+        if (KEY_PROBE) showToast("key " + e.getScanCode() + " — not bound", 3000);   // KEY_PROBE: what this body actually delivers
         return super.onKeyDown(keyCode, e);
     }
 
@@ -706,9 +755,25 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             case K_MENU: case K_SK1: if (swallowMenuUp) { swallowMenuUp = false; return true; } finish(); return true;
             case K_S1: try { camera.cancelAutoFocus(); } catch (Throwable t) {} return true;
             case K_S2: cancelCapture(); return true;
-            case K_UP: case K_DOWN: case K_LEFT: case K_RIGHT: case K_PLAY: case K_DISP:
-            case K_DELETE: case K_SK2: case K_C1: case K_AEL: case K_WHEEL_CW: case K_WHEEL_CCW: case K_DIAL_CW: case K_DIAL_CCW: return true;
+            case K_AEL: case K_AEL_LEVER: case K_DISP: return cycleOverlay(false, e);
+            case K_UP: case K_DOWN: case K_LEFT: case K_RIGHT: case K_PLAY:
+            case K_DELETE: case K_SK2: case K_C1: case K_WHEEL_CW: case K_WHEEL_CCW: case K_DIAL_CW: case K_DIAL_CCW: return true;
         }
         return super.onKeyUp(keyCode, e);
+    }
+
+    /**
+     * AEL / DISP: one step of the overlay cycle per press, whatever a body delivers for one. AEL is a hold-to-lock
+     * key, so a press that is held goes on delivering key repeat, and a body whose AEL sits behind a lever may
+     * deliver only the release. One press is one step: the press steps it, key repeat is the same press, and the
+     * release steps it only when no press arrived for it.
+     */
+    private boolean cycleOverlay(boolean down, KeyEvent e) {
+        if (down && e.getRepeatCount() > 0) return true;
+        if (!down && overlayKeyHeld) { overlayKeyHeld = false; return true; }
+        overlayKeyHeld = down;
+        overlay = (overlay + 1) % 3;
+        render();
+        return true;
     }
 }

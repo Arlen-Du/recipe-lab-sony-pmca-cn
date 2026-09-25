@@ -10,7 +10,7 @@ class I18nTest {
     void hintBarTranslations() {
         assertEquals("列表", I18n.t("browse"));
         assertEquals("写入", I18n.t("pick"));
-        assertEquals("长按收藏", I18n.t("fav (hold)"));
+        assertEquals("收藏(长按)", I18n.t("fav (hold)"));
         assertEquals("重置", I18n.t("factory"));
         assertEquals("全屏", I18n.t("hide"));
         assertEquals("退出", I18n.t("exit"));
@@ -29,21 +29,21 @@ class I18nTest {
     void toastDynamicTranslations() {
         assertEquals("Velvia 已加入收藏", I18n.tToast("Velvia added to Favourites"));
         assertEquals("Velvia 已移出收藏", I18n.tToast("Velvia removed from Favourites"));
-        assertEquals("已写入 5 项设置，重启相机生效",
+        assertEquals("已写入 5 項设置，重啟相機生效",
                 I18n.tToast("Picked — 5 values written, power-cycle the camera to apply everywhere"));
-        assertEquals("已写入 1 项设置，重启相机生效",
+        assertEquals("已写入 1 項设置，重啟相機生效",
                 I18n.tToast("Picked — 1 value written, power-cycle the camera to apply everywhere"));
-        assertEquals("Kodak Portra 400 预览中 — 按中央键写入",
+        assertEquals("Kodak Portra 400 預覽中 — 按中央键写入",
                 I18n.tToast("Kodak Portra 400 previewed — ENTER to pick"));
     }
 
     @Test
     void menuTranslations() {
-        assertEquals("设置对比", I18n.tMenuLabel(DevTools.ROW_SNAPSHOT, "Settings diff"));
+        assertEquals("设置對比", I18n.tMenuLabel(DevTools.ROW_SNAPSHOT, "Settings diff"));
         assertEquals("设置快照", I18n.tMenuLabel(DevTools.ROW_SNAPSHOT, "Settings snapshot"));
-        assertEquals("只读检查 — 26项", I18n.tMenuLabel(DevTools.ROW_LOCKS, "Read-only check — 26 slots"));
-        assertEquals("样片拍摄 — 77款", I18n.tMenuLabel(DevTools.ROW_SAMPLES, "Shoot samples — 77 recipes"));
-        assertEquals("稳定延迟 — 1.2 s", I18n.tMenuLabel(DevTools.ROW_SETTLE, "Settle delay — 1.2 s"));
+        assertEquals("只讀檢查 — 26項", I18n.tMenuLabel(DevTools.ROW_LOCKS, "Read-only check — 26 slots"));
+        assertEquals("样片拍攝 — 77款", I18n.tMenuLabel(DevTools.ROW_SAMPLES, "Shoot samples — 77 recipes"));
+        assertEquals("穩定延時 — 1.2 s", I18n.tMenuLabel(DevTools.ROW_SETTLE, "Settle delay — 1.2 s"));
     }
 
     @Test

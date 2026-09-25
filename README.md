@@ -107,7 +107,7 @@ Failures are as useful as successes.
 | **A6000** | ILCE-6000 | ✅ | built and tested on it, firmware 3.21 |
 | **A6500** | ILCE-6500 | ✅ | installs, stores, survives a power cycle |
 | **A5100** | ILCE-5100 | ✅ | works, and the wheel scrolls every recipe — but the body has no **Fn** or **AEL** button, so the brand list and the clean-preview toggle are out of reach |
-| **A7 II** | ILCE-7M2 | ✅ | reported working |
+| **A7 II** | ILCE-7M2 | ✅ | reported working — AEL sits on the AF/MF lever and delivers scan code 638 rather than 532, which the app binds too |
 | **A7** | ILCE-7 | ✅ | stores and survives a power cycle, firmware 3.20 — reported after unlocking the settings store with OpenMemories-Tweak, though whether this body needs that is untested ([#19](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/19)) |
 | **NEX-5T** | NEX-5T | ✅ | oldest app-capable generation; installs, stores and survives a power cycle on firmware 1.1, reported on app 1.0 — but that report also said the stored values did not all match, and named menu labels reading differently on this body, which is still unresolved ([#22](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/22)) |
 | **A6300** | ILCE-6300 | ✅ | stores and survives a power cycle, firmware 2.01 |
