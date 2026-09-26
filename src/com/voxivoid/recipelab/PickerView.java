@@ -116,7 +116,7 @@ public class PickerView extends View {
                 item.setColor(active ? INK : on ? ACCENT : 0xFFFFFFFF); item.setFakeBoldText(on);
                 c.drawText(rc.name, x, y + 13 * d, item);
                 small.setColor(active ? 0xAA1A1208 : 0x80FFFFFF);
-                c.drawText(favGroup ? Recipes.GROUPS[rc.group] + "  ·  " + rc.summary() : rc.summary(), x, y + 22 * d, small);
+                c.drawText(favGroup ? I18n.t(Recipes.GROUPS[rc.group]) + "  ·  " + rc.summary() : rc.summary(), x, y + 22 * d, small);
                 float tx = tag(c, rc.isEffect() ? "PE" : "CS", xr - 4 * d, y, active, active ? 0x331A1208 : (rc.isEffect() ? 0x55B8741A : 0x33FFFFFF), active ? INK : 0xCCFFFFFF);
                 if (!favGroup && favs.contains(idx)) { star.setColor(active ? INK : ACCENT); Legend.star(c, tx - 4 * d - 6 * d, y + 11 * d, 6 * d, star); }
             }

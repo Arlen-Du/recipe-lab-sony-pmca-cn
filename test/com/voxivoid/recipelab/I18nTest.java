@@ -26,6 +26,17 @@ class I18nTest {
     }
 
     @Test
+    void everyBrandHasATranslation() {
+        assertEquals("索尼", I18n.t("Sony"));
+        assertEquals("柯達", I18n.t("Kodak"));
+        assertEquals("電影", I18n.t("Cine"));
+        assertEquals("佳能/尼康", I18n.t("Canon / Nikon"));
+        assertEquals("松下/奧林巴斯", I18n.t("Pana / Olympus"));
+        assertEquals("伊爾福", I18n.t("Ilford"));
+        for (String g : Recipes.GROUPS) assertNotEquals(g, I18n.t(g), g + " has no brand translation");
+    }
+
+    @Test
     void toastDynamicTranslations() {
         assertEquals("Velvia 已加入收藏", I18n.tToast("Velvia added to Favourites"));
         assertEquals("Velvia 已移出收藏", I18n.tToast("Velvia removed from Favourites"));

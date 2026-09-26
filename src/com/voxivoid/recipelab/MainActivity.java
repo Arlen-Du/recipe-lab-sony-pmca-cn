@@ -559,7 +559,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         Recipes.Recipe r = Recipes.ALL[recipe];
         boolean dirty = dirty();
         String pos = (recipe + 1) + " / " + Recipes.ALL.length;
-        String grp = Recipes.GROUPS[r.group].toUpperCase();
+        String grp = I18n.t(Recipes.GROUPS[r.group]).toUpperCase();
         picker.setVisibility(overlay == OV_BROWSER ? View.VISIBLE : View.GONE);
         if (overlay == OV_BROWSER) { panel.setVisibility(View.GONE); mini.setVisibility(View.GONE); picker.set(recipe, browserCol, browserGroup, favs); return; }
         if (overlay == OV_FULL) {

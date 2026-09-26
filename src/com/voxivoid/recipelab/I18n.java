@@ -47,6 +47,22 @@ public final class I18n {
         DICT.put("No favourites yet", "暂无收藏");
         DICT.put("Hold the centre button on a recipe to keep it here", "长按中央键加入收藏");
 
+        // ---- Brand names (browser groups, Recipes.GROUPS) — keys must match GROUPS exactly
+        // The font is traditional-first, so an unconfirmed simplified glyph is written in its traditional form
+        // (達 電 擬 萊 蘇 奧 爾); Latin (GR) and the 繁简同形 brands stay as they are.
+        DICT.put("Sony", "索尼");
+        DICT.put("Fuji Sim", "富士");
+        DICT.put("Fuji Film", "富士胶片");
+        DICT.put("Kodak", "柯达");
+        DICT.put("Cine", "Cine");
+        DICT.put("Ricoh GR", "理光GR");
+        DICT.put("Leica", "徠卡");
+        DICT.put("Hasselblad", "哈苏");
+        DICT.put("Canon / Nikon", "佳能/尼康");
+        DICT.put("Pana / Olympus", "松下/奧林巴斯");
+        DICT.put("Other Stocks", "其他");
+        DICT.put("Ilford", "伊尔福");
+
         // ---- PromptView (確定 avoids missing 认/确)
         DICT.put("confirm", "確定");
         DICT.put("cancel", "取消");
