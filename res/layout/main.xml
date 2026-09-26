@@ -36,8 +36,7 @@
                 android:textColor="#FFFFFFFF"
                 android:shadowColor="#AA000000"
                 android:shadowDx="0" android:shadowDy="1" android:shadowRadius="2"
-                android:singleLine="true"
-                android:ellipsize="end" />
+                android:singleLine="true" />
             <TextView
                 android:id="@+id/badge"
                 android:layout_width="wrap_content"
@@ -82,8 +81,7 @@
             android:layout_marginTop="1dp"
             android:textSize="11sp"
             android:textColor="#A6FFFFFF"
-            android:maxLines="2"
-            android:ellipsize="end" />
+            android:maxLines="2" />
 
         <HorizontalScrollView
             android:id="@+id/chipscroll"
