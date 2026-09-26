@@ -35,7 +35,8 @@ public class PickerView extends View {
     public PickerView(Context c, AttributeSet a) {
         super(c, a);
         d = c.getResources().getDisplayMetrics().density;
-        legend = new Legend(d);
+        legend = new Legend(c, d);
+        Cn.apply(c, head, item, small);
         bg.setColor(0xF0101010);
         edge.setColor(0x66F2B85C); edge.setStyle(Paint.Style.STROKE); edge.setStrokeWidth(d);
         sel.setColor(ACCENT);

@@ -18,10 +18,10 @@
     src="https://img.shields.io/badge/Sponsor_this_project-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white&style=for-the-badge"
     alt="Sponsor this project"></a>
 </p>
-s for
+
 <p align="center">
   <sub>
-    The app is free and stays free. Sponsoring pay keeping it maintained, for building new features, and for
+    The app is free and stays free. Sponsoring pays for keeping it maintained, for building new features, and for
     buying the cameras it has to be tested on — every body beyond the A6000 is one someone has to own.
   </sub>
 </p>
@@ -289,11 +289,17 @@ The common questions — RAW files, damage, LUTs, newer bodies — are in the **
 | Look not applied after picking a recipe | Turn the camera off and on |
 | `no live preview: ...` in the panel | Something else is holding the camera; close and reopen the app |
 | Text shows `Â·` | Old build; install the APK from the [latest release](https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest) |
+| Chinese text shows as `口` boxes | The bundled font did not make it into the APK, or it has no glyph for that character: build with `build.cmd` / `build.sh` (they pack `assets/` and refuse to build without `assets/cn.ttf`), and run `node tools/check-font.js` — see [docs/I18N.md](docs/I18N.md) |
 
 ## For developers
 
 The reverse-engineering notes — source layout, the settings-store ID map, the exit rule, live-preview
 parameters, key scan codes and how to build — live in **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)**.
+
+The Chinese UI is two layers, documented in **[docs/I18N.md](docs/I18N.md)**: `Cn.java` hands every text control and
+every Canvas text Paint the font bundled in `assets/cn.ttf` (the camera firmware font has no Chinese glyphs, so a
+missing one draws as `口`), and `I18n.java` translates the strings at the UI edge. `tools/check-font.js` proves the
+bundled subset covers every character the app draws — run it after adding any Chinese text.
 
 To contribute, read **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)** first: branch naming, commit format and the
 release flow are all enforced by CI.

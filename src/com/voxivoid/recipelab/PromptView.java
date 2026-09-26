@@ -25,7 +25,8 @@ public class PromptView extends View {
     public PromptView(Context c, AttributeSet a) {
         super(c, a);
         d = c.getResources().getDisplayMetrics().density;
-        legend = new Legend(d);
+        legend = new Legend(c, d);
+        Cn.apply(c, title, body, opt, note);
         bg.setColor(0xF0141414);
         edge.setColor(0x88F2B85C); edge.setStyle(Paint.Style.STROKE); edge.setStrokeWidth(d);
         title.setColor(0xFFFFFFFF); title.setTextSize(15 * d); title.setFakeBoldText(true);

@@ -21,6 +21,11 @@ rmdir /s /q out\gen out\classes out\dex out\apklib 2>nul
 mkdir out\gen out\classes out\dex out\apklib\lib\armeabi
 copy /Y out\libs\armeabi\librecipelab.so out\apklib\lib\armeabi\ >nul
 
+REM The bundled Chinese font must be here: aapt only packs assets when it is told where they are, and an APK
+REM without cn.ttf still builds and still runs -- it just falls back to the firmware font and draws 口 for every
+REM Chinese character. Fail here instead.
+if not exist assets\cn.ttf (echo missing: assets\cn.ttf & exit /b 1)
+
 echo [1/7] aapt R.java
 "%BT%\aapt.exe" package -f -m -J out\gen -M AndroidManifest.xml -S res -I "%AJ%" || exit /b 1
 echo [2/7] javac
@@ -32,7 +37,7 @@ for /r out\classes %%f in (*.class) do set CLASSES=!CLASSES! "%%f"
 "%JAVA%\java.exe" -cp "%BT%\lib\d8.jar" com.android.tools.r8.D8 --release --min-api 10 --lib "%AJ%" --output out\dex !CLASSES! || exit /b 1
 endlocal
 echo [4/7] aapt package + dex + native lib
-"%BT%\aapt.exe" package -f -M AndroidManifest.xml -S res -I "%AJ%" -F out\unaligned.apk || exit /b 1
+"%BT%\aapt.exe" package -f -M AndroidManifest.xml -S res -A assets -I "%AJ%" -F out\unaligned.apk || exit /b 1
 pushd out\dex
 "%BT%\aapt.exe" add ..\unaligned.apk classes.dex || exit /b 1
 popd

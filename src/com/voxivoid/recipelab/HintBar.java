@@ -22,7 +22,7 @@ public class HintBar extends View {
 
     public HintBar(Context c, AttributeSet a) {
         super(c, a);
-        legend = new Legend(c.getResources().getDisplayMetrics().density);
+        legend = new Legend(c, c.getResources().getDisplayMetrics().density);
     }
 
     public void setMode(int m) { if (mode != m) { mode = m; invalidate(); } }

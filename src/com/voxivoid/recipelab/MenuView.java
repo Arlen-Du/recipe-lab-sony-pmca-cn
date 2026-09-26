@@ -25,7 +25,8 @@ public class MenuView extends View {
     public MenuView(Context c, AttributeSet a) {
         super(c, a);
         d = c.getResources().getDisplayMetrics().density;
-        legend = new Legend(d);
+        legend = new Legend(c, d);
+        Cn.apply(c, head, item, small);
         bg.setColor(0xF0141414);
         edge.setColor(0x88F2B85C); edge.setStyle(Paint.Style.STROKE); edge.setStrokeWidth(d);
         head.setColor(ACCENT); head.setTextSize(9 * d); head.setFakeBoldText(true);

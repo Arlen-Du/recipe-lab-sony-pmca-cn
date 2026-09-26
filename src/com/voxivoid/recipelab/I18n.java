@@ -4,24 +4,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Chinese localization mapping for Recipe Lab (Sony Camera Firmware safe edition).
+ * Chinese localization mapping for Recipe Lab.
  *
- * Sony PMCA cameras (A6000, A6300, A7 series, etc.) use a specialized CJK font engine
- * that prioritizes traditional glyphs and unified CJK kanji. Simplified Chinese characters
- * with modern simplified radicals (like 浏, 览, 应, 隐, 标) render as tofu boxes ("口").
+ * Every string the UI shows passes through here on its way to the screen: this class translates it, and {@link Cn}
+ * hands it the font bundled in assets/cn.ttf to be drawn with. The two layers are separable on purpose — an entry
+ * that is missing falls back to the English original and never crashes (see the tests in test/I18nTest.java), while
+ * a character the bundled font does not carry is a *build-time* problem: tools/check-font.js names the character and
+ * the file, and the subset is regenerated. Wording is therefore free again; it is no longer chosen around which
+ * glyphs the camera firmware happens to have (the comment at the top of docs/I18N.md has that history).
  *
- * This implementation uses only verified, 100% safe glyphs:
- * - Common dual-compatible characters (繁简同形字, e.g. 列表, 写入, 收藏, 重置, 全屏, 退出, 自动)
- * - Standard Sony camera traditional glyphs (e.g. 標準, 確定)
- * - Compact 2-character limits to eliminate layout collisions and text clipping.
- *
- * Measured on the body (ILCE-7M2): the font has no glyph for
- * 开 单 读 检 项 测 试 摄 连 稳 延 迟 应 时 红 浏 览 隐 标 调 关 确 认
- * — they draw as "口" — while the traditional form of each one does. The strings below therefore spell
- * the affected words with the traditional glyph (開发菜單, 只讀檢查, 样片拍攝, 畫質, 風格, 紅叶 …),
- * the same fallback 標準 / 確定 already used. Simplified-only characters that no body has confirmed
- * on camera are written in their traditional form too, since the font is traditional-first.
- * "延" is the exception: it has no traditional form and no glyph either, so 延迟 is written 時間.
+ * What still constrains the wording:
+ * - Chip values stay short (about three characters, see {@link #tChipValue}) so the parameter row does not shift.
+ * - Creative Style and Picture Effect names follow Sony's own Chinese camera-menu wording, so the app reads like
+ *   the camera menus for the same setting.
+ * - Brand names are simplified; {@code Cine} stays in Latin deliberately (see {@link #has}).
  */
 public final class I18n {
     private I18n() {}
@@ -29,106 +25,106 @@ public final class I18n {
     private static final Map<String, String> DICT = new HashMap<String, String>();
 
     static {
-        // ---- Hint bar / key legend (Verified on-camera: all 2-char safe words)
-        DICT.put("browse", "列表");     // replaces 浏览 (浏 and 览 are missing in camera font)
-        DICT.put("pick", "写入");       // replaces 应用 (应 is missing in camera font)
-        DICT.put("fav (hold)", "收藏(长按)"); // verified working on camera
-        DICT.put("factory", "重置");    // verified working on camera
-        DICT.put("hide", "全屏");       // replaces 隐藏 (隐 is missing in camera font)
-        DICT.put("exit", "退出");       // verified working on camera
-        DICT.put("edit", "修改");       // replaces 调节 (调 is missing in camera font)
-        DICT.put("done", "完成");       // verified working on camera
+        // ---- Hint bar / key legend (2 characters: the bar has to fit six of them)
+        DICT.put("browse", "浏览");
+        DICT.put("pick", "写入");
+        DICT.put("fav (hold)", "收藏(长按)");
+        DICT.put("factory", "重置");
+        DICT.put("hide", "隐藏");
+        DICT.put("exit", "退出");
+        DICT.put("edit", "修改");
+        DICT.put("done", "完成");
 
         // ---- Browser (PickerView)
         DICT.put("BRAND", "品牌");
         DICT.put("Favourites", "收藏");
         DICT.put("recipes", "配方");
-        DICT.put("close", "返回");       // replaces 关闭 to avoid missing 关
+        DICT.put("close", "关闭");
         DICT.put("No favourites yet", "暂无收藏");
         DICT.put("Hold the centre button on a recipe to keep it here", "长按中央键加入收藏");
 
         // ---- Brand names (browser groups, Recipes.GROUPS) — keys must match GROUPS exactly.
-        // Simplified like the brands themselves: the body was checked and 达 苏 尔 胶 draw normally, so no traditional
-        // form is needed here. Cine is kept in Latin on purpose.
+        // Simplified like the brands themselves — the body was checked and 达 苏 尔 胶 draw normally, and the
+        // bundled font covers them regardless. Cine is kept in Latin on purpose.
         DICT.put("Sony", "索尼");
         DICT.put("Fuji Sim", "富士");
         DICT.put("Fuji Film", "富士胶片");
         DICT.put("Kodak", "柯达");
         DICT.put("Cine", "Cine");
         DICT.put("Ricoh GR", "理光GR");
-        DICT.put("Leica", "徠卡");
+        DICT.put("Leica", "徕卡");
         DICT.put("Hasselblad", "哈苏");
         DICT.put("Canon / Nikon", "佳能/尼康");
-        DICT.put("Pana / Olympus", "松下/奧林巴斯");
+        DICT.put("Pana / Olympus", "松下/奥林巴斯");
         DICT.put("Other Stocks", "其他");
         DICT.put("Ilford", "伊尔福");
 
-        // ---- PromptView (確定 avoids missing 认/确)
-        DICT.put("confirm", "確定");
+        // ---- PromptView
+        DICT.put("confirm", "确定");
         DICT.put("cancel", "取消");
-        DICT.put("Accept", "確定");
+        DICT.put("Accept", "确定");
         DICT.put("Cancel", "取消");
         DICT.put("quality slot not located yet — live view only", "画质槽位未知 — 仅限预览");
 
         // ---- Dev menu (MenuView / DevTools)
-        DICT.put("DEV TOOLS", "開发菜單");   // 开 / 单 have no glyph — traditional form does
+        DICT.put("DEV TOOLS", "开发菜单");
         DICT.put("move", "移动");
 
 
-        DICT.put("select", "確定");
+        DICT.put("select", "确定");
         DICT.put("Settings snapshot", "设置快照");
-        DICT.put("Settings diff", "设置對比");
+        DICT.put("Settings diff", "设置对比");
         DICT.put("Store the value of every settings id", "保存所有设置 ID 数值");
-        DICT.put("Compare every settings id against the snapshot", "對比当前设置与快照");
-        DICT.put("Test every slot a recipe writes for the read-only flag", "測試配方寫入项是否只讀");
-        DICT.put("One JPEG per recipe, in table order — MENU stops the run", "自动連拍各配方, 按MENU停止");
-        DICT.put("Wait after applying a recipe before the shutter fires", "應用配方后的快门等待時间");
-        DICT.put("No live preview — the sample run needs the camera", "无实时预览 — 相机就绪");
+        DICT.put("Compare every settings id against the snapshot", "对比当前设置与快照");
+        DICT.put("Test every slot a recipe writes for the read-only flag", "测试配方写入项是否只读");
+        DICT.put("One JPEG per recipe, in table order — MENU stops the run", "自动连拍所有配方, 按MENU停止");
+        DICT.put("Wait after applying a recipe before the shutter fires", "应用配方后的快门等待时间");
+        DICT.put("No live preview — the sample run needs the camera", "无实时预览 — 需要相机");
 
         // ---- Common values
-        DICT.put("auto", "自动");       // verified working on camera
+        DICT.put("auto", "自动");
         DICT.put("kelvin", "色温");
         DICT.put("off", "OFF");
 
-        // ---- Creative Styles (Uses 標準 to avoid missing 标)
-        DICT.put("Standard", "標準");   // replaces 标准 (标 renders as 口 on camera)
+        // ---- Creative Styles: Sony's own Chinese camera-menu wording, matching Recipes.STYLE_LABEL
+        DICT.put("Standard", "标准");
         DICT.put("Vivid", "生动");
         DICT.put("Neutral", "中性");
         DICT.put("Portrait", "肖像");
         DICT.put("Landscape", "风景");
         DICT.put("B&W", "黑白");
-        DICT.put("Clear", "清澈");
-        DICT.put("Deep", "深邃");
-        DICT.put("Light", "清淡");
-        DICT.put("Sunset", "日落");
+        DICT.put("Clear", "清晰");
+        DICT.put("Deep", "深色");
+        DICT.put("Light", "明快");
+        DICT.put("Sunset", "黄昏");
         DICT.put("Night", "夜景");
-        DICT.put("Autumn", "紅叶");
-        DICT.put("Sepia", "复古");
+        DICT.put("Autumn", "红叶");
+        DICT.put("Sepia", "棕褐色");
 
-        // ---- Picture Effects (Strictly <= 2 chars to fit chips without expansion)
+        // ---- Picture Effects (keys are Recipes.PE_LABEL, so the chips stay short)
         DICT.put("Toy", "玩具");
         DICT.put("Pop", "流行");
-        DICT.put("Poster", "分色");
+        DICT.put("Poster", "色调");
         DICT.put("Retro", "复古");
-        DICT.put("High-key", "亮調");
+        DICT.put("High-key", "高亮");
         DICT.put("Part col", "局部");
-        DICT.put("HC mono", "單色");
+        DICT.put("HC mono", "单色");
         DICT.put("Soft foc", "柔焦");
         DICT.put("HDR art", "HDR");
         DICT.put("Rich mono", "黑白");
-        DICT.put("Miniature", "微縮");
-        DICT.put("Illust", "插圖");
+        DICT.put("Miniature", "微缩");
+        DICT.put("Illust", "插图");
         DICT.put("Watercol", "水彩");
 
         // ---- Effect sub-params (Compact)
-        DICT.put("blue", "冷藍");
-        DICT.put("pink", "粉紅");
+        DICT.put("blue", "冷蓝");
+        DICT.put("pink", "粉红");
         DICT.put("green", "绿");
-        DICT.put("normal", "標準");
+        DICT.put("normal", "标准");
         DICT.put("cool", "冷调");
         DICT.put("warm", "暖调");
-        DICT.put("magenta", "品紅");
-        DICT.put("red", "紅");
+        DICT.put("magenta", "品红");
+        DICT.put("red", "红");
         DICT.put("yellow", "黄");
         DICT.put("color", "彩色");
         DICT.put("bw", "黑白");
@@ -150,7 +146,7 @@ public final class I18n {
         DICT.put("DRO", "DRO");
         DICT.put("QUALITY", "画质");
 
-        // ---- Common Toasts (Safe characters only)
+        // ---- Common Toasts
         DICT.put("Already picked — nothing to write", "已是当前设置，无需写入");
         DICT.put("Not picked", "已取消");
         DICT.put("Factory values staged — ENTER to pick", "已载入出厂设置 — 按中央键写入");
@@ -197,13 +193,13 @@ public final class I18n {
     public static String tMenuLabel(int row, String original) {
         if (original == null) return "";
         if (row == DevTools.ROW_LOCKS && original.startsWith("Read-only check — ")) {
-            return "只讀檢查 — " + original.substring("Read-only check — ".length()).replace(" slots", "项").replace("slots", "项");
+            return "只读检查 — " + original.substring("Read-only check — ".length()).replace(" slots", "项").replace("slots", "项");
         }
         if (row == DevTools.ROW_SAMPLES && original.startsWith("Shoot samples — ")) {
-            return "样片拍攝 — " + original.substring("Shoot samples — ".length()).replace(" recipes", "款").replace("recipes", "款");
+            return "样片拍摄 — " + original.substring("Shoot samples — ".length()).replace(" recipes", "款").replace("recipes", "款");
         }
         if (row == DevTools.ROW_SETTLE && original.startsWith("Settle delay — ")) {
-            return "穩定延時 — " + original.substring("Settle delay — ".length());   // 延迟: 延 has no glyph at all, so it is 時間
+            return "稳定延时 — " + original.substring("Settle delay — ".length());
         }
         return t(original);
     }
@@ -220,7 +216,7 @@ public final class I18n {
             return "此配方需要 JPEG 格式生效";
         }
         if (detail.equals("Creative Style recipes use the Factory recipe's quality.")) {
-            return "風格外觀將使用出厂畫質";
+            return "风格外观将使用出厂画质";
         }
         return t(detail);
     }
@@ -261,29 +257,29 @@ public final class I18n {
 
         // "Quality: ... — ENTER to pick"
         if (msg.startsWith("Quality: ") && msg.contains(" — ENTER to pick")) {
-            return msg.replace("Quality: ", "畫質: ").replace(" — ENTER to pick", " — 按中央键写入");
+            return msg.replace("Quality: ", "画质: ").replace(" — ENTER to pick", " — 按中央键写入");
         }
 
         // "Snapshot of N settings taken..."
         if (msg.startsWith("Snapshot of ") && msg.contains("settings taken. Change a menu setting, reopen, press C1 again.")) {
             String count = msg.replace("Snapshot of ", "").replaceAll(" settings taken.*", "").trim();
-            return "已保存 " + count + " 项设置快照。修改设置后重新打開按 C1。";
+            return "已保存 " + count + " 项设置快照。修改设置后重新打开按 C1。";
         }
 
         // "Read failed: ..."
         if (msg.startsWith("Read failed: ")) {
-            return "讀取设置失败: " + msg.substring("Read failed: ".length());
+            return "读取设置失败: " + msg.substring("Read failed: ".length());
         }
 
         // "Not written — the camera holds this setting / these settings read-only..."
         if (msg.startsWith("Not written — the camera holds ")) {
-            return msg.replace("Not written — the camera holds this setting read-only: ", "未写入 — 此项设置为只讀: ")
-                      .replace("Not written — the camera holds these settings read-only: ", "未写入 — 以下设置项为只讀: ")
+            return msg.replace("Not written — the camera holds this setting read-only: ", "未写入 — 此项设置为只读: ")
+                      .replace("Not written — the camera holds these settings read-only: ", "未写入 — 以下设置项为只读: ")
                       .replace(". Unlock the settings store with OpenMemories-Tweak (Protection → Unlock protected settings), then pick the recipe again.",
-                               "。請用 OpenMemories-Tweak 解除保護（Protection → Unlock protected settings）后再写入。");
+                               "。请用 OpenMemories-Tweak 解除保护（Protection → Unlock protected settings）后再写入。");
         }
 
-        // "Shooting X / Y · RECIPE — MENU stops"  (拍摄 / 连拍: 摄 and 连 have no glyph)
+        // "Shooting X / Y · RECIPE — MENU stops"
         if (msg.startsWith("Shooting ") && msg.contains(" — MENU stops")) {
             return msg.replace("Shooting ", "拍照中 ").replace(" — MENU stops", " — 按 MENU 停止");
         }
@@ -305,13 +301,13 @@ public final class I18n {
     }
 
     /**
-     * Translates the HUD metadata line under recipe name concisely to prevent 3-line overflow.
+     * Translates the HUD metadata line under recipe name concisely to prevent overflow.
      */
     public static String tMetaLine(String meta) {
         if (meta == null) return null;
         String res = meta;
         res = res.replace("Picture Effect ", "效果 ");
-        res = res.replace(" (Creative Style ignored, JPEG only)", " (忽略風格, 仅JPEG)");
+        res = res.replace(" (Creative Style ignored, JPEG only)", " (忽略风格, 仅JPEG)");
         res = res.replace("  ·  PP3 matrix", "  ·  PP3矩阵");
         res = res.replace("  ·  QUALITY → ", "  ·  画质 → ");
         res = res.replace(" (now ", " (当前 ");
