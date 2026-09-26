@@ -47,9 +47,9 @@ public final class I18n {
         DICT.put("No favourites yet", "暂无收藏");
         DICT.put("Hold the centre button on a recipe to keep it here", "长按中央键加入收藏");
 
-        // ---- Brand names (browser groups, Recipes.GROUPS) — keys must match GROUPS exactly
-        // The font is traditional-first, so an unconfirmed simplified glyph is written in its traditional form
-        // (達 電 擬 萊 蘇 奧 爾); Latin (GR) and the 繁简同形 brands stay as they are.
+        // ---- Brand names (browser groups, Recipes.GROUPS) — keys must match GROUPS exactly.
+        // NOTE: 柯达 · 哈苏 · 伊尔福 · 富士胶片 use simplified glyphs (达 苏 尔 胶) the traditional-first font has not
+        // been confirmed to draw — the same "口" risk as the missing-glyph note above. Cine is kept in Latin on purpose.
         DICT.put("Sony", "索尼");
         DICT.put("Fuji Sim", "富士");
         DICT.put("Fuji Film", "富士胶片");
@@ -68,7 +68,7 @@ public final class I18n {
         DICT.put("cancel", "取消");
         DICT.put("Accept", "確定");
         DICT.put("Cancel", "取消");
-        DICT.put("quality slot not located yet — live view only", "画质槽位未知 — 仅限预览");
+        DICT.put("quality slot not located yet — live view only", "画质槽位未知 — 仅限預覽");
 
         // ---- Dev menu (MenuView / DevTools)
         DICT.put("DEV TOOLS", "開发菜單");   // 开 / 单 have no glyph — traditional form does
@@ -80,10 +80,10 @@ public final class I18n {
         DICT.put("Settings diff", "设置對比");
         DICT.put("Store the value of every settings id", "保存所有设置 ID 数值");
         DICT.put("Compare every settings id against the snapshot", "對比当前设置与快照");
-        DICT.put("Test every slot a recipe writes for the read-only flag", "測試配方寫入项是否只讀");
+        DICT.put("Test every slot a recipe writes for the read-only flag", "測試配方寫入項是否只讀");
         DICT.put("One JPEG per recipe, in table order — MENU stops the run", "自动連拍各配方, 按MENU停止");
         DICT.put("Wait after applying a recipe before the shutter fires", "應用配方后的快门等待時间");
-        DICT.put("No live preview — the sample run needs the camera", "无实时预览 — 相机就绪");
+        DICT.put("No live preview — the sample run needs the camera", "无实时預覽 — 相机就绪");
 
         // ---- Common values
         DICT.put("auto", "自动");       // verified working on camera
@@ -141,7 +141,7 @@ public final class I18n {
         DICT.put("SHARP", "锐度");
         DICT.put("MATRIX", "矩阵");
         DICT.put("EFFECT", "效果");
-        DICT.put("SUB", "子项");
+        DICT.put("SUB", "子項");
         DICT.put("WB", "WB");
         DICT.put("KELVIN", "色温");
         DICT.put("A-B", "A-B");
@@ -162,6 +162,12 @@ public final class I18n {
         String tr = DICT.get(text);
         return tr != null ? tr : text;
     }
+
+    /**
+     * Whether a key has an entry at all, even one whose text reads the same as its key — a brand deliberately left in
+     * Latin, like "Cine". {@link #t(String)} cannot tell that entry from a fallback, so a coverage test asks this.
+     */
+    public static boolean has(String text) { return text != null && DICT.containsKey(text); }
 
     /** Translates an array of strings in place or returns a translated copy. */
     public static String[] t(String[] texts) {
@@ -191,7 +197,7 @@ public final class I18n {
     public static String tMenuLabel(int row, String original) {
         if (original == null) return "";
         if (row == DevTools.ROW_LOCKS && original.startsWith("Read-only check — ")) {
-            return "只讀檢查 — " + original.substring("Read-only check — ".length()).replace(" slots", "项").replace("slots", "项");
+            return "只讀檢查 — " + original.substring("Read-only check — ".length()).replace(" slots", "項").replace("slots", "項");
         }
         if (row == DevTools.ROW_SAMPLES && original.startsWith("Shoot samples — ")) {
             return "样片拍攝 — " + original.substring("Shoot samples — ".length()).replace(" recipes", "款").replace("recipes", "款");
@@ -233,7 +239,7 @@ public final class I18n {
             int end = msg.indexOf(" value");
             if (end > start) {
                 String n = msg.substring(start, end).trim();
-                return "已写入 " + n + " 项设置，重启相机生效";
+                return "已写入 " + n + " 項设置，重啟相機生效";
             }
         }
 
@@ -250,7 +256,7 @@ public final class I18n {
         // "NAME previewed — ENTER to pick"
         if (msg.endsWith(" previewed — ENTER to pick")) {
             String name = msg.substring(0, msg.length() - " previewed — ENTER to pick".length());
-            return name + " 预览中 — 按中央键写入";
+            return name + " 預覽中 — 按中央键写入";
         }
 
         // "Quality: ... — ENTER to pick"
@@ -261,7 +267,7 @@ public final class I18n {
         // "Snapshot of N settings taken..."
         if (msg.startsWith("Snapshot of ") && msg.contains("settings taken. Change a menu setting, reopen, press C1 again.")) {
             String count = msg.replace("Snapshot of ", "").replaceAll(" settings taken.*", "").trim();
-            return "已保存 " + count + " 项设置快照。修改设置后重新打開按 C1。";
+            return "已保存 " + count + " 項设置快照。修改设置后重新打開按 C1。";
         }
 
         // "Read failed: ..."
@@ -271,8 +277,8 @@ public final class I18n {
 
         // "Not written — the camera holds this setting / these settings read-only..."
         if (msg.startsWith("Not written — the camera holds ")) {
-            return msg.replace("Not written — the camera holds this setting read-only: ", "未写入 — 此项设置为只讀: ")
-                      .replace("Not written — the camera holds these settings read-only: ", "未写入 — 以下设置项为只讀: ")
+            return msg.replace("Not written — the camera holds this setting read-only: ", "未写入 — 此項设置为只讀: ")
+                      .replace("Not written — the camera holds these settings read-only: ", "未写入 — 以下设置項为只讀: ")
                       .replace(". Unlock the settings store with OpenMemories-Tweak (Protection → Unlock protected settings), then pick the recipe again.",
                                "。請用 OpenMemories-Tweak 解除保護（Protection → Unlock protected settings）后再写入。");
         }
@@ -310,7 +316,7 @@ public final class I18n {
         res = res.replace("  ·  QUALITY → ", "  ·  画质 → ");
         res = res.replace(" (now ", " (当前 ");
         res = res.replace("  ·  RAW is on: effect ignored", "  ·  RAW开启: 忽略效果");
-        res = res.replace("  ·  no live preview: ", "  ·  无预览: ");
+        res = res.replace("  ·  no live preview: ", "  ·  无預覽: ");
         return res;
     }
 
@@ -320,7 +326,7 @@ public final class I18n {
     public static String tMiniLine(String mini) {
         if (mini == null) return null;
         String res = mini;
-        res = res.replace("   · preview", "   · 预览");
+        res = res.replace("   · preview", "   · 預覽");
         res = res.replace("   · active", "   · 生效");
         res = res.replace("   · quality → ", "   · 画质 → ");
         return res;
