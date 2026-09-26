@@ -22,7 +22,32 @@ final class Cn {
 
     /** the bundled font, or the system default if it could not be loaded */
     static Typeface font(Context c) {
-        if (t == null) { try { t = Typeface.createFromAsset(c.getAssets(), "cn.ttf"); } catch (Throwable e) {} }
+        if (t == null) {
+            try {
+                t = Typeface.createFromAsset(c.getAssets(), "cn.ttf");
+            } catch (Throwable e) {
+                t = null;
+            }
+            if (t == null && c != null) {
+                try {
+                    java.io.File f = new java.io.File(c.getCacheDir(), "cn.ttf");
+                    if (!f.exists() || f.length() == 0) {
+                        java.io.InputStream in = c.getAssets().open("cn.ttf");
+                        java.io.FileOutputStream out = new java.io.FileOutputStream(f);
+                        byte[] b = new byte[8192];
+                        int n;
+                        while ((n = in.read(b)) > 0) out.write(b, 0, n);
+                        in.close();
+                        out.close();
+                    }
+                    if (f.exists() && f.length() > 0) {
+                        t = Typeface.createFromFile(f);
+                    }
+                } catch (Throwable e) {
+                    t = null;
+                }
+            }
+        }
         return t != null ? t : Typeface.DEFAULT;
     }
 
@@ -38,15 +63,20 @@ final class Cn {
      */
     static void apply(Context c, TextView v) {
         if (v == null) return;
-        Typeface cur = v.getTypeface();
-        boolean bold = cur != null && (cur.getStyle() & Typeface.BOLD) != 0;
-        v.setTypeface(font(c));
-        v.getPaint().setFakeBoldText(bold);
+        Typeface f = font(c);
+        if (f != Typeface.DEFAULT) {
+            Typeface cur = v.getTypeface();
+            boolean bold = cur != null && (cur.getStyle() & Typeface.BOLD) != 0;
+            v.setTypeface(f);
+            if (bold) v.getPaint().setFakeBoldText(true);
+        }
     }
 
     /** the Canvas path: every Paint that draws text in a custom view. */
     static void apply(Context c, Paint... ps) {
         Typeface f = font(c);
-        for (Paint p : ps) if (p != null) p.setTypeface(f);
+        if (f != Typeface.DEFAULT) {
+            for (Paint p : ps) if (p != null) p.setTypeface(f);
+        }
     }
 }

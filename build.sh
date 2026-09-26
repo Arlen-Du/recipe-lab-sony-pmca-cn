@@ -94,7 +94,7 @@ find out/classes -name '*.class' > out/classes.txt
 "$JAVA/java" -cp "$BT/lib/d8.jar" com.android.tools.r8.D8 --release --min-api 10 \
   --lib "$AJ" --output out/dex "@out/classes.txt"
 echo "[4/7] aapt package + dex + native lib"
-"$BT/aapt" package -f -M "$MANIFEST" -S res -A assets -I "$AJ" -F out/unaligned.apk
+"$BT/aapt" package -f -0 ttf -M "$MANIFEST" -S res -A assets -I "$AJ" -F out/unaligned.apk
 ( cd out/dex   && "$BT/aapt" add ../unaligned.apk classes.dex )
 ( cd out/apklib && "$BT/aapt" add ../unaligned.apk lib/armeabi/librecipelab.so )
 echo "[5/7] zipalign"
