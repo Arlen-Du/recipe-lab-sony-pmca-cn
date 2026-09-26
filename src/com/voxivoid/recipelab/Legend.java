@@ -1,5 +1,6 @@
 package com.voxivoid.recipelab;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -19,12 +20,13 @@ public class Legend {
     private final Canvas nowhere = new Canvas();      // measuring pass draws into this
     private final float d;
 
-    public Legend(float density) {
+    public Legend(Context c, float density) {
         d = density;
         fill.setColor(0xCCFFFFFF); fill.setStyle(Paint.Style.FILL);
         stroke.setColor(0xCCFFFFFF); stroke.setStyle(Paint.Style.STROKE);
         text.setColor(0x99FFFFFF);
         keyText.setColor(0xCCFFFFFF); keyText.setTextAlign(Paint.Align.CENTER); keyText.setFakeBoldText(true);
+        Cn.apply(c, text, keyText);
     }
 
     private static final Path STAR = new Path();

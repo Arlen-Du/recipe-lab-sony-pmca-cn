@@ -115,6 +115,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         prompt = (PromptView) findViewById(R.id.prompt);
         menu = (MenuView) findViewById(R.id.menu);
         chips = (LinearLayout) findViewById(R.id.chips);
+        Cn.apply(this, name); Cn.apply(this, badge); Cn.apply(this, tag); Cn.apply(this, count);
+        Cn.apply(this, meta); Cn.apply(this, mini); Cn.apply(this, toast);
         buildChips();
         SurfaceView sv = (SurfaceView) findViewById(R.id.surface);
         holder = sv.getHolder();
@@ -134,6 +136,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             c.setLayoutParams(lp);
             TextView l = new TextView(this); l.setTextSize(9); l.setText(I18n.tRow(ROW_NAME[i]));
             TextView v = new TextView(this); v.setTextSize(13); v.setTypeface(Typeface.DEFAULT_BOLD); v.setSingleLine(true);
+            Cn.apply(this, l); Cn.apply(this, v);
             c.addView(l); c.addView(v);
             chips.addView(c);
             chip[i] = c; chipLabel[i] = l; chipValue[i] = v;

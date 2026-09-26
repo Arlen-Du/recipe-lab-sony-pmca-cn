@@ -35,7 +35,10 @@ src/com/voxivoid/recipelab/
                                walks the Favourites group — pure functions, no Android, covered by test/
   DevTools.java                the developer menu rows and the sample run's delays, messages and manifest —
                                pure functions, no Android, covered by test/
-  res/raw/ids.txt              every settings entry of 16 bytes or less, used by the snapshot/diff tool
+  I18n.java                    English → Chinese dictionary applied at the UI edge — pure Java, no Android,
+                               covered by test/ (an entry that is missing falls back to the English original)
+  Cn.java                      loads the font bundled in assets/cn.ttf and applies it to every TextView and every
+                               Canvas text Paint — the camera firmware font has no Chinese glyphs (docs/I18N.md)
   PickerView.java              Canvas-drawn brand browser (Favourites first, then the brands)
   MenuView.java                Canvas-drawn modal list: the developer menu behind C1
   Legend.java                  Canvas-drawn key icons and the favourite star, fit-to-width (camera font has no symbol glyphs).
@@ -47,10 +50,11 @@ src/com/voxivoid/recipelab/
 jni/jni.cpp                    Backup_read / Backup_write / Backup_sync_all via OpenMemories-Platform
 jni/platform/                  git submodule: ma1co/OpenMemories-Platform
 res/                           layout, shape drawables, launcher icon
+assets/cn.ttf                  the bundled Chinese font: a DroidSansFallback subset (docs/I18N.md)
 test/com/voxivoid/recipelab/   JUnit tests for Recipes and Params (see Unit tests)
 build.sh                       the build: ndk-build, aapt, javac, d8, zipalign, apksigner
 build.cmd                      the same seven steps on Windows
-tools/                         version computation, bumping, the unit tests, and the CI gates
+tools/                         version computation, bumping, the unit tests, the font coverage check, and the CI gates
 ```
 
 ## Settings slots

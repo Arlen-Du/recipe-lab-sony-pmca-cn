@@ -37,7 +37,9 @@ if [ -n "${JAVA_HOME:-}" ]; then JAVA="$JAVA_HOME/bin"; else JAVA="$(dirname "$(
 export PATH="$JAVA:$PATH"
 AJ="$PLATFORM_JAR"
 
-for f in "$AJ" "$BT/aapt" "$BT/zipalign" "$BT/apksigner" "$BT/lib/d8.jar"; do
+# assets/cn.ttf is in the list on purpose: without it aapt packs no font, the APK still builds and still runs,
+# and every Chinese character falls back to the firmware font and draws 口.
+for f in "$AJ" "$BT/aapt" "$BT/zipalign" "$BT/apksigner" "$BT/lib/d8.jar" "$ROOT/assets/cn.ttf"; do
   [ -e "$f" ] || { echo "missing: $f" >&2; exit 1; }
 done
 
@@ -92,7 +94,7 @@ find out/classes -name '*.class' > out/classes.txt
 "$JAVA/java" -cp "$BT/lib/d8.jar" com.android.tools.r8.D8 --release --min-api 10 \
   --lib "$AJ" --output out/dex "@out/classes.txt"
 echo "[4/7] aapt package + dex + native lib"
-"$BT/aapt" package -f -M "$MANIFEST" -S res -I "$AJ" -F out/unaligned.apk
+"$BT/aapt" package -f -M "$MANIFEST" -S res -A assets -I "$AJ" -F out/unaligned.apk
 ( cd out/dex   && "$BT/aapt" add ../unaligned.apk classes.dex )
 ( cd out/apklib && "$BT/aapt" add ../unaligned.apk lib/armeabi/librecipelab.so )
 echo "[5/7] zipalign"

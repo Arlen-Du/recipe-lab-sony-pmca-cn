@@ -8,11 +8,11 @@ class I18nTest {
 
     @Test
     void hintBarTranslations() {
-        assertEquals("列表", I18n.t("browse"));
+        assertEquals("浏览", I18n.t("browse"));
         assertEquals("写入", I18n.t("pick"));
         assertEquals("收藏(长按)", I18n.t("fav (hold)"));
         assertEquals("重置", I18n.t("factory"));
-        assertEquals("全屏", I18n.t("hide"));
+        assertEquals("隐藏", I18n.t("hide"));
         assertEquals("退出", I18n.t("exit"));
         assertEquals("修改", I18n.t("edit"));
         assertEquals("完成", I18n.t("done"));
@@ -31,7 +31,7 @@ class I18nTest {
         assertEquals("索尼", I18n.t("Sony"));
         assertEquals("理光GR", I18n.t("Ricoh GR"));
         assertEquals("佳能/尼康", I18n.t("Canon / Nikon"));
-        assertEquals("松下/奧林巴斯", I18n.t("Pana / Olympus"));
+        assertEquals("松下/奥林巴斯", I18n.t("Pana / Olympus"));
     }
 
     @Test
@@ -48,11 +48,11 @@ class I18nTest {
 
     @Test
     void menuTranslations() {
-        assertEquals("设置對比", I18n.tMenuLabel(DevTools.ROW_SNAPSHOT, "Settings diff"));
+        assertEquals("设置对比", I18n.tMenuLabel(DevTools.ROW_SNAPSHOT, "Settings diff"));
         assertEquals("设置快照", I18n.tMenuLabel(DevTools.ROW_SNAPSHOT, "Settings snapshot"));
-        assertEquals("只讀檢查 — 26项", I18n.tMenuLabel(DevTools.ROW_LOCKS, "Read-only check — 26 slots"));
-        assertEquals("样片拍攝 — 77款", I18n.tMenuLabel(DevTools.ROW_SAMPLES, "Shoot samples — 77 recipes"));
-        assertEquals("穩定延時 — 1.2 s", I18n.tMenuLabel(DevTools.ROW_SETTLE, "Settle delay — 1.2 s"));
+        assertEquals("只读检查 — 26项", I18n.tMenuLabel(DevTools.ROW_LOCKS, "Read-only check — 26 slots"));
+        assertEquals("样片拍摄 — 77款", I18n.tMenuLabel(DevTools.ROW_SAMPLES, "Shoot samples — 77 recipes"));
+        assertEquals("稳定延时 — 1.2 s", I18n.tMenuLabel(DevTools.ROW_SETTLE, "Settle delay — 1.2 s"));
     }
 
     @Test
@@ -62,7 +62,7 @@ class I18nTest {
 
     @Test
     void chipValueCompact() {
-        assertEquals("標準", I18n.tChipValue("Standard"));
+        assertEquals("标准", I18n.tChipValue("Standard"));
         assertEquals("生动", I18n.tChipValue("Vivid"));
         assertEquals("玩具", I18n.tChipValue("Toy"));
         assertEquals("OFF", I18n.tChipValue("off"));
