@@ -45,7 +45,7 @@ running **create-release** once it lands.
 ```
 feat(browser): jump to a brand with the top dial
 
-The picker had no fast path past 77 recipes.
+The picker had no fast path past 78 recipes.
 
 Closes #123
 ```

@@ -31,8 +31,8 @@ class DevToolsTest {
     }
 
     @Test void theSampleRowNamesTheWholeTable() {
-        assertEquals("Shoot samples — 77 recipes", DevTools.rowLabel(DevTools.ROW_SAMPLES, false, 0));
-        assertEquals(77, Recipes.ALL.length, "the label counts the table, so the table is what it must count");
+        assertEquals("Shoot samples — 78 recipes", DevTools.rowLabel(DevTools.ROW_SAMPLES, false, 0));
+        assertEquals(78, Recipes.ALL.length, "the label counts the table, so the table is what it must count");
     }
 
     @Test void theDelayRowShowsTheChosenDelay() {
@@ -78,26 +78,26 @@ class DevToolsTest {
 
     // ---- what the run says while it walks the table
     @Test void progressCountsFramesFromOneAndNamesTheWayOut() {
-        String p = DevTools.progress(1, 77, "FACTORY (ST)");
-        assertTrue(p.startsWith("Shooting 1 / 77"), p);
+        String p = DevTools.progress(1, 78, "FACTORY (ST)");
+        assertTrue(p.startsWith("Shooting 1 / 78"), p);
         assertTrue(p.contains("FACTORY (ST)"), p);
         assertTrue(p.contains("MENU"), p);
     }
 
     @Test void theEndOfARunSaysHowManyFramesAndWhereTheListIs() {
-        assertTrue(DevTools.doneMessage(77, 77).contains("77 of 77"), DevTools.doneMessage(77, 77));
-        assertTrue(DevTools.doneMessage(77, 77).contains(DevTools.MANIFEST));
-        assertTrue(DevTools.stoppedMessage(12, 77).contains("12 of 77"), DevTools.stoppedMessage(12, 77));
-        assertTrue(DevTools.stoppedMessage(0, 77).contains("before the first frame"), "nothing was shot, so there is nothing to point at");
-        assertFalse(DevTools.stoppedMessage(0, 77).contains(DevTools.MANIFEST));
+        assertTrue(DevTools.doneMessage(78, 78).contains("78 of 78"), DevTools.doneMessage(78, 78));
+        assertTrue(DevTools.doneMessage(78, 78).contains(DevTools.MANIFEST));
+        assertTrue(DevTools.stoppedMessage(12, 78).contains("12 of 78"), DevTools.stoppedMessage(12, 78));
+        assertTrue(DevTools.stoppedMessage(0, 78).contains("before the first frame"), "nothing was shot, so there is nothing to point at");
+        assertFalse(DevTools.stoppedMessage(0, 78).contains(DevTools.MANIFEST));
         assertTrue(DevTools.shootFailed(13, 12, "timeout").contains("frame 13"), DevTools.shootFailed(13, 12, "timeout"));
     }
 
     // ---- the manifest
     @Test void theHeaderRecordsTheFrameCountTheOrderAndTheDelay() {
-        String h = DevTools.manifestHeader(77, 1200);
+        String h = DevTools.manifestHeader(78, 1200);
         assertTrue(h.startsWith("#"), h);
-        assertTrue(h.contains("77 frames in recipe order"), h);
+        assertTrue(h.contains("78 frames in recipe order"), h);
         assertTrue(h.contains("settle 1200 ms"), h);
         assertTrue(h.contains("frame" + DevTools.SEP + "recipe"), "the header names the columns of the lines below it");
     }

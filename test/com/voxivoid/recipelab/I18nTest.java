@@ -51,7 +51,7 @@ class I18nTest {
         assertEquals("设置对比", I18n.tMenuLabel(DevTools.ROW_SNAPSHOT, "Settings diff"));
         assertEquals("设置快照", I18n.tMenuLabel(DevTools.ROW_SNAPSHOT, "Settings snapshot"));
         assertEquals("只读检查 — 26项", I18n.tMenuLabel(DevTools.ROW_LOCKS, "Read-only check — 26 slots"));
-        assertEquals("样片拍摄 — 77款", I18n.tMenuLabel(DevTools.ROW_SAMPLES, "Shoot samples — 77 recipes"));
+        assertEquals("样片拍摄 — 78款", I18n.tMenuLabel(DevTools.ROW_SAMPLES, "Shoot samples — 78 recipes"));
         assertEquals("稳定延时 — 1.2 s", I18n.tMenuLabel(DevTools.ROW_SETTLE, "Settle delay — 1.2 s"));
     }
 

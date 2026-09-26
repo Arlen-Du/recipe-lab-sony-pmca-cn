@@ -130,6 +130,7 @@ public class Recipes {
         new Recipe(KODAK, "Kodak Ektar 100",                     STD,      3,  1,  1, 0, AUTO, 0,     0,  0,  0, -1, 6),
         new Recipe(KODAK, "Kodak Ektachrome E100",               CLEAR,    3,  1,  0, 0, AUTO, 0,    -1,  0,  0, -1, 6),
         new Recipe(KODAK, "Kodachrome 64",                       DEEP,     3,  2,  1, 0, AUTO, 0,    -1,  0,  0, -1, 6),   // M1 on Deep went magenta; the reference is cool-neutral
+        new Recipe(KODAK, "Kodak Vision3 250D (5207)",           NEUTRAL, -1, -2, -1, 0, K,    5500,  1,  1,  0,  1, 4),
         new Recipe(KODAK, "Kodak Vision3 500T (daylight)",       NEUTRAL, -1,  0,  0, 0, K,    3200,  0,  0,  0,  1, 3),
         new Recipe(KODAK, "Kodak Vision 200T (Asteroid City)",   NEUTRAL, -2, -3,  0, 0, K,    5000,  2,  3,  0,  1, 3),   // yellow-green pastel, teal sky; Retro Photo washed it out
         new Recipe(KODAK, "Kodak Tri-X 400",                     MONO,     0,  2,  2, 0, AUTO, 0,     0,  0,  0,  1, 6),
