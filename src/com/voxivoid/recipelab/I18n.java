@@ -47,9 +47,9 @@ public final class I18n {
         DICT.put("No favourites yet", "暂无收藏");
         DICT.put("Hold the centre button on a recipe to keep it here", "长按中央键加入收藏");
 
-        // ---- Brand names (browser groups, Recipes.GROUPS) — keys must match GROUPS exactly
-        // The font is traditional-first, so an unconfirmed simplified glyph is written in its traditional form
-        // (達 電 擬 萊 蘇 奧 爾); Latin (GR) and the 繁简同形 brands stay as they are.
+        // ---- Brand names (browser groups, Recipes.GROUPS) — keys must match GROUPS exactly.
+        // Simplified like the brands themselves: the body was checked and 达 苏 尔 胶 draw normally, so no traditional
+        // form is needed here. Cine is kept in Latin on purpose.
         DICT.put("Sony", "索尼");
         DICT.put("Fuji Sim", "富士");
         DICT.put("Fuji Film", "富士胶片");
@@ -162,6 +162,12 @@ public final class I18n {
         String tr = DICT.get(text);
         return tr != null ? tr : text;
     }
+
+    /**
+     * Whether a key has an entry at all, even one whose text reads the same as its key — a brand deliberately left in
+     * Latin, like "Cine". {@link #t(String)} cannot tell that entry from a fallback, so a coverage test asks this.
+     */
+    public static boolean has(String text) { return text != null && DICT.containsKey(text); }
 
     /** Translates an array of strings in place or returns a translated copy. */
     public static String[] t(String[] texts) {
