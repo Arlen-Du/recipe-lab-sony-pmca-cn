@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class RecipesTest {
 
     @Test void hasTheDocumentedNumberOfRecipes() {
-        assertEquals(77, Recipes.ALL.length,
+        assertEquals(78, Recipes.ALL.length,
                 "README.md, CLAUDE.md, docs/DEVELOPMENT.md and docs/FAQ.md quote the recipe count -- update them together with this number");
     }
 
@@ -189,6 +189,7 @@ class RecipesTest {
         assertEquals("Neutral  -4/-2  -0.3  DRO Lv3", recipe("Eterna").summary());
         assertEquals("Neutral  -2/-2  DRO Lv5", recipe("Rec709 Video (flat-ish)").summary());
         assertEquals("Portrait  -1/-1  +0.7  A3  G1", recipe("Kodak Portra 400").summary());
+        assertEquals("Neutral  -1/-2  +0.3  DRO Lv4  5500K  A1  G1", recipe("Kodak Vision3 250D (5207)").summary());
         assertEquals("Neutral  -1/0  +0.3  DRO Lv3  3200K", recipe("Kodak Vision3 500T (daylight)").summary());
     }
 

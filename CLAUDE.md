@@ -1,6 +1,6 @@
 # Recipe Lab — agent rules
 
-A PlayMemories (PMCA) camera app for the Sony A6000: 77 film-look recipes written straight into the
+A PlayMemories (PMCA) camera app for the Sony A6000: 78 film-look recipes written straight into the
 camera's settings store. Native lib (ndk-build, NDK r16b) + Java, no Gradle.
 
 Read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) before changing anything.
