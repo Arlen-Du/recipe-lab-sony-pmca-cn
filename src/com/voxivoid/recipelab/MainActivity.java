@@ -46,6 +46,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private static final int K_UP = 103, K_DOWN = 108, K_LEFT = 105, K_RIGHT = 106, K_ENTER = 232, K_MENU = 514, K_SK1 = 229,
             K_DELETE = 595, K_SK2 = 513, K_PLAY = 207, K_DISP = 608, K_FN = 520, K_AEL = 532, K_C1 = 622, K_S1 = 516, K_S2 = 518,
             K_WHEEL_CW = 522, K_WHEEL_CCW = 523, K_DIAL_CW = 525, K_DIAL_CCW = 526;
+    /** what the AEL button delivers on a body whose AEL sits on the AF/MF lever — with the lever on AEL, ILCE-7M2 sends this, not K_AEL */
+    private static final int K_AEL_LEVER = 638;
 
     private static final int ACCENT = 0xFFF2B85C, INK = 0xFF1A1208, WHITE = 0xFFFFFFFF, DIM = 0x99FFFFFF;
     /** how long the centre button is held before it means "favourite" instead of "pick" */
@@ -85,6 +87,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private Object cameraEx; private Camera camera; private String origFlat;
     private int row = 0, recipe = 0, overlay = OV_FULL;   // Params.OV_*: the full panel, the pill, nothing, the browser
     private boolean focus = false;                        // a chip is focused: UP/DOWN change its value
+    private boolean overlayKeyHeld = false;               // AEL / DISP: the press has been handled, so its release must not step the cycle again
     private int browserCol = COL_RECIPES;                 // browser: Params.COL_GROUPS or COL_RECIPES
     private int browserGroup = 0;                     // browser: the group the brand column is on — Favourites.GROUP or a brand
     private int lastChip = 0;                         // chip to return to when leaving the recipe line
@@ -167,7 +170,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         stopRun(false);                                          // a run cannot outlive the camera it shoots with
         closeMenu();
         handler.removeCallbacks(hideToast);
-        handler.removeCallbacks(enterHold); enterHeld = false; enterLong = false;
+        handler.removeCallbacks(enterHold); enterHeld = false; enterLong = false; overlayKeyHeld = false;
         holder.removeCallback(this);
         // leave the live parameters equal to what is STORED (not to the launch snapshot): the camera writes some live
         // values (exposure bias, WB fine-tune) straight back into the settings store, which would undo a fresh store
@@ -619,7 +622,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             case K_DOWN: case K_WHEEL_CW: case K_DIAL_CW: if (browserCol == COL_GROUPS) nextGroup(+1); else nextInGroup(+1); return true;
             case K_LEFT: case K_RIGHT: if (browserCol == COL_RECIPES) { browserCol = COL_GROUPS; render(); } else enterRecipeColumn(); return true;
             case K_MENU: case K_SK1: swallowMenuUp = true; openBrowser(false); return true;
-            case K_FN: case K_AEL: case K_DISP: openBrowser(false); return true;
+            case K_FN: case K_AEL: case K_AEL_LEVER: case K_DISP: overlayKeyHeld = true; openBrowser(false); return true;   // closes the browser; its release must not step the cycle
             case K_C1: openMenu(); return true;
             case K_DELETE: case K_SK2: stageFactory(); return true;
             case K_S1: try { camera.autoFocus(null); } catch (Throwable t) {} return true;
@@ -688,7 +691,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                 if (focus) stepValue(e.getScanCode() == K_UP ? +1 : -1); else toggleLine();
                 return true;
             }
-            case K_AEL: case K_DISP: overlay = (overlay + 1) % 3; render(); return true;   // full → pill → hidden; the browser is not in the cycle
+            case K_AEL: case K_AEL_LEVER: case K_DISP: return cycleOverlay(true, e);   // full → pill → hidden; the browser is not in the cycle
             case K_FN: openBrowser(true); return true;
             case K_C1: openMenu(); return true;
             case K_DELETE: case K_SK2: stageFactory(); return true;
@@ -711,9 +714,25 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             case K_MENU: case K_SK1: if (swallowMenuUp) { swallowMenuUp = false; return true; } finish(); return true;
             case K_S1: try { camera.cancelAutoFocus(); } catch (Throwable t) {} return true;
             case K_S2: cancelCapture(); return true;
-            case K_UP: case K_DOWN: case K_LEFT: case K_RIGHT: case K_PLAY: case K_DISP:
-            case K_DELETE: case K_SK2: case K_C1: case K_AEL: case K_WHEEL_CW: case K_WHEEL_CCW: case K_DIAL_CW: case K_DIAL_CCW: return true;
+            case K_AEL: case K_AEL_LEVER: case K_DISP: return cycleOverlay(false, e);
+            case K_UP: case K_DOWN: case K_LEFT: case K_RIGHT: case K_PLAY:
+            case K_DELETE: case K_SK2: case K_C1: case K_WHEEL_CW: case K_WHEEL_CCW: case K_DIAL_CW: case K_DIAL_CCW: return true;
         }
         return super.onKeyUp(keyCode, e);
+    }
+
+    /**
+     * AEL / DISP: one step of the overlay cycle per press, whatever a body delivers for one. AEL is a hold-to-lock
+     * key, so a press that is held goes on delivering key repeat, and a body whose AEL sits behind a lever may
+     * deliver only the release. One press is one step: the press steps it, key repeat is the same press, and the
+     * release steps it only when no press arrived for it.
+     */
+    private boolean cycleOverlay(boolean down, KeyEvent e) {
+        if (down && e.getRepeatCount() > 0) return true;
+        if (!down && overlayKeyHeld) { overlayKeyHeld = false; return true; }
+        overlayKeyHeld = down;
+        overlay = (overlay + 1) % 3;
+        render();
+        return true;
     }
 }
