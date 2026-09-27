@@ -30,18 +30,21 @@ final class Cn {
             }
             if (t == null && c != null) {
                 try {
-                    java.io.File f = new java.io.File(c.getCacheDir(), "cn.ttf");
-                    if (!f.exists() || f.length() == 0) {
-                        java.io.InputStream in = c.getAssets().open("cn.ttf");
-                        java.io.FileOutputStream out = new java.io.FileOutputStream(f);
-                        byte[] b = new byte[8192];
-                        int n;
-                        while ((n = in.read(b)) > 0) out.write(b, 0, n);
-                        in.close();
-                        out.close();
-                    }
-                    if (f.exists() && f.length() > 0) {
-                        t = Typeface.createFromFile(f);
+                    java.io.File cache = c.getCacheDir();
+                    if (cache != null) {
+                        java.io.File f = new java.io.File(cache, "cn.ttf");
+                        if (!f.exists() || f.length() == 0) {
+                            java.io.InputStream in = c.getAssets().open("cn.ttf");
+                            java.io.FileOutputStream out = new java.io.FileOutputStream(f);
+                            byte[] b = new byte[8192];
+                            int n;
+                            while ((n = in.read(b)) > 0) out.write(b, 0, n);
+                            in.close();
+                            out.close();
+                        }
+                        if (f.exists() && f.length() > 0) {
+                            t = Typeface.createFromFile(f);
+                        }
                     }
                 } catch (Throwable e) {
                     t = null;
