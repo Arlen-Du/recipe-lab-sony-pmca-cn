@@ -1,9 +1,9 @@
 package com.voxivoid.recipelab;
 
 /**
- * The developer menu behind C1, and the sample run it can start: the rows the menu has, the settle delay the run
- * waits between applying a recipe and firing the shutter, the progress lines it shows, and the manifest it writes
- * so the frames can be matched to recipes afterwards.
+ * The app menu (MENU hold) and the developer menu under it, and the sample run it can start: the rows each menu
+ * has, the About and key-logger pages, the settle delay the run waits between applying a recipe and firing the
+ * shutter, the progress lines it shows, and the manifest it writes so the frames can be matched to recipes afterwards.
  *
  * The run itself is a timed loop in MainActivity (stage a recipe → wait → shutter → wait → next); everything it
  * decides without the camera is here. No android.* import may appear in this class (tools/test.sh).
@@ -11,10 +11,16 @@ package com.voxivoid.recipelab;
 final class DevTools {
     private DevTools() {}
 
-    static final String TITLE = "DEV TOOLS";
+    static final String APP_TITLE = "RECIPE LAB", TITLE = "DEV TOOLS", ABOUT_TITLE = "ABOUT";
 
-    /** menu rows, in display order */
-    static final int ROW_SNAPSHOT = 0, ROW_LOCKS = 1, ROW_SAMPLES = 2, ROW_SETTLE = 3, ROWS = 4;
+    /** the two menu levels: the app menu a MENU hold opens, and the developer menu under it */
+    static final int LEVEL_APP = 0, LEVEL_DEV = 1;
+
+    /** app menu rows, in display order */
+    static final int APP_BROWSE = 0, APP_PANEL = 1, APP_RESET = 2, APP_ABOUT = 3, APP_DEV = 4, APP_ROWS = 5;
+
+    /** developer menu rows, in display order */
+    static final int ROW_SNAPSHOT = 0, ROW_LOCKS = 1, ROW_SAMPLES = 2, ROW_SETTLE = 3, ROW_KEYS = 4, ROWS = 5;
 
     /**
      * Settle delays to pick from, in ms: how long the preview pipeline gets after a recipe is applied before the
@@ -32,9 +38,119 @@ final class DevTools {
     /** field separator of a manifest line; no recipe name contains it (RecipesTest) */
     static final String SEP = "|";
 
-    // ------------------------------------------------------------ the menu
+    // ------------------------------------------------------------ the app menu
+    /** how many rows a level has */
+    static int rows(int level) { return level == LEVEL_APP ? APP_ROWS : ROWS; }
+
+    /** the row above / below on a level, wrapping */
+    static int nextRow(int level, int row, int dir) { int n = rows(level); return (row + n + dir) % n; }
+
+    /** an app menu row's title */
+    static String appLabel(int row) {
+        switch (row) {
+            case APP_BROWSE: return "Browse recipes";
+            case APP_PANEL: return "Panel visibility";
+            case APP_RESET: return "Reset settings";
+            case APP_ABOUT: return "About";
+            case APP_DEV: return "Developer  >";
+            default: return "?" + row;
+        }
+    }
+
+    /** the line under an app menu row's title */
+    static String appDetail(int row) {
+        switch (row) {
+            case APP_BROWSE: return "Brands and favourites";
+            case APP_PANEL: return "What stays over the live image — left / right to change";
+            case APP_RESET: return "Back to the camera's factory look";
+            case APP_ABOUT: return "Version, camera, platform";
+            case APP_DEV: return "Settings snapshot, read-only check, samples, key logger";
+            default: return "";
+        }
+    }
+
+    /**
+     * The value an app menu row shows at its right edge, which left / right change in place; null for a row that has
+     * none. Panel visibility shows the panel state: Full, Label (the pill) or Hidden.
+     */
+    static String appValue(int row, int overlay) { return row == APP_PANEL ? panelLabel(overlay) : null; }
+
+    /** a panel state as the menu names it */
+    static String panelLabel(int overlay) {
+        switch (overlay) {
+            case Params.OV_FULL: return "Full";
+            case Params.OV_PILL: return "Label";
+            case Params.OV_HIDDEN: return "Hidden";
+            default: return "?";
+        }
+    }
+
+    /** the panel state left / right lands on: full → label → hidden, wrapping; the browser is never one of them */
+    static int nextPanel(int overlay, int dir) {
+        int o = overlay >= Params.OV_FULL && overlay <= Params.OV_HIDDEN ? overlay : Params.OV_FULL;
+        return (o + 3 + dir) % 3;
+    }
+
+    /** the About page: {name, value}. The version comes from the installed package at runtime, never from here. */
+    static String[][] about(String version, String model, String platform) {
+        return new String[][] {
+            { "version", orUnknown(version) },
+            { "camera", orUnknown(model) },
+            { "platform", orUnknown(platform) },
+            { "source", "github.com/voxivoid/recipe-lab-sony-pmca" },
+        };
+    }
+
+    // ------------------------------------------------------------ the reset question (hold trash, or Reset settings)
+    /** the question asked before the factory look is stored: it replaces whatever the camera has now */
+    static final String RESET_TITLE = "Reset to factory settings?",
+            RESET_BODY = "Stores Standard 0 / 0 / 0, auto white balance, no effect, in place of the current look";
+    /** the answers; Cancel is the one highlighted when the question opens, so a stray centre press changes nothing */
+    static final String[] RESET_OPTIONS = { "Reset", "Cancel" };
+    static final int RESET_DEFAULT = 1;
+
+    /**
+     * What the key probe found, as one line: "has Fn AEL C1  ·  lacks DISP  ·  unknown ZOOM_T". {@code has} lines up
+     * with {@code scans}; a null entry is a key the camera would not answer for.
+     */
+    static String keysFound(int[] scans, Boolean[] has) {
+        StringBuilder yes = new StringBuilder(), no = new StringBuilder(), unk = new StringBuilder();
+        for (int i = 0; i < scans.length; i++) {
+            StringBuilder b = has[i] == null ? unk : has[i] ? yes : no;
+            b.append(b.length() == 0 ? "" : " ").append(Keys.name(scans[i]));
+        }
+        if (yes.length() == 0 && no.length() == 0) return "the camera would not say";
+        StringBuilder out = new StringBuilder();
+        if (yes.length() > 0) out.append("has ").append(yes);
+        if (no.length() > 0) out.append(out.length() == 0 ? "" : "  ·  ").append("lacks ").append(no);
+        if (unk.length() > 0) out.append(out.length() == 0 ? "" : "  ·  ").append("unknown ").append(unk);
+        return out.toString();
+    }
+
+    private static String orUnknown(String s) { return s == null || s.isEmpty() ? "unknown" : s; }
+
+    // ------------------------------------------------------------ the key logger
+    /** how many events the logger keeps on screen, newest first */
+    static final int LOG_LINES = 10;
+    /** the file the logger appends to in the app's files dir */
+    static final String KEY_LOG = "keys.txt";
+
+    /** the logger page title: the body it runs on */
+    static String logTitle(String model, String platform) { return "KEY LOGGER  ·  " + orUnknown(model) + "  ·  " + orUnknown(platform); }
+
+    /**
+     * One key event: {"down 595", "DELETE  ·  repeat 0  ·  logic 1103"}. The scan code is what a compatibility report
+     * needs; the name, the repeat count and Sony's logic code (null before platform API 3) are what make sense of it.
+     */
+    static String[] logLine(boolean down, int scan, int repeat, Integer logic) {
+        String name = Keys.name(scan);
+        return new String[] { (down ? "down " : "up   ") + scan,
+                (name.isEmpty() ? "?" : name) + "  ·  repeat " + repeat + (logic == null ? "" : "  ·  logic " + logic) };
+    }
+
+    // ------------------------------------------------------------ the developer menu
     /** the row above / below, wrapping */
-    static int nextRow(int row, int dir) { return (row + ROWS + dir) % ROWS; }
+    static int nextRow(int row, int dir) { return nextRow(LEVEL_DEV, row, dir); }
 
     /** a row's title; the snapshot row and the delay row say what they will do next */
     static String rowLabel(int row, boolean snapshotTaken, int settle) {
@@ -42,7 +158,8 @@ final class DevTools {
             case ROW_SNAPSHOT: return snapshotTaken ? "Settings diff" : "Settings snapshot";
             case ROW_LOCKS: return "Read-only check — " + Params.allSlots().size() + " slots";
             case ROW_SAMPLES: return "Shoot samples — " + Recipes.ALL.length + " recipes";
-            case ROW_SETTLE: return "Settle delay — " + settleLabel(settle);
+            case ROW_SETTLE: return "Settle delay";
+            case ROW_KEYS: return "Key logger";
             default: return "?" + row;
         }
     }
@@ -53,10 +170,14 @@ final class DevTools {
             case ROW_SNAPSHOT: return snapshotTaken ? "Compare every settings id against the snapshot" : "Store the value of every settings id";
             case ROW_LOCKS: return "Test every slot a recipe writes for the read-only flag";
             case ROW_SAMPLES: return "One JPEG per recipe, in table order — MENU stops the run";
-            case ROW_SETTLE: return "Wait after applying a recipe before the shutter fires";
+            case ROW_SETTLE: return "Wait after applying a recipe before the shutter fires — left / right to change";
+            case ROW_KEYS: return "Show every key's scan code — hold MENU to leave";
             default: return "";
         }
     }
+
+    /** the value a developer menu row shows at its right edge, which left / right change in place; null for none */
+    static String rowValue(int row, int settle) { return row == ROW_SETTLE ? settleLabel(settle) : null; }
 
     // ------------------------------------------------------------ the settle delay
     /** a stored delay index brought back into the table */

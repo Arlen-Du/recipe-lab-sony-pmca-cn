@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
-/** The developer menu and the sample run: the rows, the settle delay, the progress lines and the manifest. */
+/** The app menu, the developer menu and the sample run: the rows, About, the key logger, the settle delay, the progress lines and the manifest. */
 class DevToolsTest {
 
     // ---- menu rows
@@ -35,17 +35,12 @@ class DevToolsTest {
         assertEquals(77, Recipes.ALL.length, "the label counts the table, so the table is what it must count");
     }
 
-    @Test void theDelayRowShowsTheChosenDelay() {
-        assertEquals("Settle delay — 0.8 s", DevTools.rowLabel(DevTools.ROW_SETTLE, false, 0));
-        assertEquals("Settle delay — 1.2 s", DevTools.rowLabel(DevTools.ROW_SETTLE, false, 1));
-    }
-
     @Test void oneTurnOfTheMenuVisitsEveryRowItDefines() {
         // ROWS is what the menu can reach: a row defined past it is dead, and nothing else would say so
         Set<Integer> visited = new HashSet<Integer>();
         int r = DevTools.ROW_SNAPSHOT;
         for (int i = 0; i < DevTools.ROWS; i++) { visited.add(r); r = DevTools.nextRow(r, +1); }
-        assertEquals(new HashSet<Integer>(Arrays.asList(DevTools.ROW_SNAPSHOT, DevTools.ROW_LOCKS, DevTools.ROW_SAMPLES, DevTools.ROW_SETTLE)), visited);
+        assertEquals(new HashSet<Integer>(Arrays.asList(DevTools.ROW_SNAPSHOT, DevTools.ROW_LOCKS, DevTools.ROW_SAMPLES, DevTools.ROW_SETTLE, DevTools.ROW_KEYS)), visited);
         assertEquals(DevTools.ROW_SNAPSHOT, r, "and comes back to the first row");
     }
 
@@ -53,6 +48,100 @@ class DevToolsTest {
         assertEquals(1, DevTools.nextRow(0, +1));
         assertEquals(0, DevTools.nextRow(DevTools.ROWS - 1, +1));
         assertEquals(DevTools.ROWS - 1, DevTools.nextRow(0, -1));
+    }
+
+    @Test void theKeyLoggerRowSaysHowToLeaveIt() {
+        assertEquals("Key logger", DevTools.rowLabel(DevTools.ROW_KEYS, false, 0));
+        assertTrue(DevTools.rowDetail(DevTools.ROW_KEYS, false).contains("hold MENU"), "every other key is logged, so the way out has to be said");
+    }
+
+    // ---- the app menu
+    @Test void theAppMenuHasTheFunctionsThatHaveNoKeyOnSomeBodies() {
+        assertEquals(DevTools.APP_ROWS, DevTools.rows(DevTools.LEVEL_APP));
+        assertEquals(DevTools.ROWS, DevTools.rows(DevTools.LEVEL_DEV));
+        String[] labels = new String[DevTools.APP_ROWS];
+        for (int r = 0; r < DevTools.APP_ROWS; r++) labels[r] = DevTools.appLabel(r);
+        assertEquals(Arrays.asList("Browse recipes", "Panel visibility", "Reset settings", "About", "Developer  >"), Arrays.asList(labels));
+        assertEquals(DevTools.APP_BROWSE, 0, "the menu opens on Browse, so a body without Fn is one press from the list");
+    }
+
+    @Test void everyAppRowHasADetailLine() {
+        for (int r = 0; r < DevTools.APP_ROWS; r++) assertFalse(DevTools.appDetail(r).isEmpty(), "row " + r);
+    }
+
+    @Test void onlyThePanelRowHasAValueAndItNamesThePanelState() {
+        assertEquals("Full", DevTools.appValue(DevTools.APP_PANEL, Params.OV_FULL));
+        assertEquals("Label", DevTools.appValue(DevTools.APP_PANEL, Params.OV_PILL));
+        assertEquals("Hidden", DevTools.appValue(DevTools.APP_PANEL, Params.OV_HIDDEN));
+        for (int r = 0; r < DevTools.APP_ROWS; r++) if (r != DevTools.APP_PANEL) assertNull(DevTools.appValue(r, Params.OV_FULL), "row " + r);
+        assertTrue(DevTools.appDetail(DevTools.APP_PANEL).contains("left / right"), "the row says how to change it");
+    }
+
+    @Test void leftRightWalkThePanelStatesAndWrap() {
+        assertEquals(Params.OV_PILL, DevTools.nextPanel(Params.OV_FULL, +1));
+        assertEquals(Params.OV_HIDDEN, DevTools.nextPanel(Params.OV_PILL, +1));
+        assertEquals(Params.OV_FULL, DevTools.nextPanel(Params.OV_HIDDEN, +1));
+        assertEquals(Params.OV_HIDDEN, DevTools.nextPanel(Params.OV_FULL, -1));
+        assertEquals(Params.OV_PILL, DevTools.nextPanel(Params.OV_BROWSER, +1), "never lands on the browser; from it, starts at full");
+    }
+
+    @Test void theSettleRowShowsItsDelayAsAValue() {
+        assertEquals("Settle delay", DevTools.rowLabel(DevTools.ROW_SETTLE, false, 1));
+        assertEquals("1.2 s", DevTools.rowValue(DevTools.ROW_SETTLE, 1));
+        assertEquals("0.8 s", DevTools.rowValue(DevTools.ROW_SETTLE, 0));
+        for (int r = 0; r < DevTools.ROWS; r++) if (r != DevTools.ROW_SETTLE) assertNull(DevTools.rowValue(r, 1), "row " + r);
+    }
+
+    // ---- the reset question
+    @Test void theResetQuestionAsksAndDefaultsToCancel() {
+        assertTrue(DevTools.RESET_TITLE.endsWith("?"), DevTools.RESET_TITLE);
+        assertEquals("Reset", DevTools.RESET_OPTIONS[0], "option 0 is the one that writes");
+        assertEquals("Cancel", DevTools.RESET_OPTIONS[DevTools.RESET_DEFAULT], "a stray centre press cancels");
+        assertFalse(DevTools.RESET_BODY.isEmpty());
+    }
+
+    @Test void oneTurnOfTheAppMenuVisitsEveryRowAndWraps() {
+        Set<Integer> visited = new HashSet<Integer>();
+        int r = DevTools.APP_BROWSE;
+        for (int i = 0; i < DevTools.APP_ROWS; i++) { visited.add(r); r = DevTools.nextRow(DevTools.LEVEL_APP, r, +1); }
+        assertEquals(DevTools.APP_ROWS, visited.size());
+        assertEquals(DevTools.APP_BROWSE, r);
+        assertEquals(DevTools.APP_DEV, DevTools.nextRow(DevTools.LEVEL_APP, DevTools.APP_BROWSE, -1));
+    }
+
+    // ---- About
+    @Test void aboutShowsVersionCameraPlatformAndSource() {
+        String[][] a = DevTools.about("9.8.7", null, "");
+        assertEquals(4, a.length);
+        assertEquals("version", a[0][0]); assertEquals("9.8.7", a[0][1]);
+        assertEquals("camera", a[1][0]); assertEquals("unknown", a[1][1], "no model from the camera");
+        assertEquals("platform", a[2][0]); assertEquals("unknown", a[2][1], "an empty platform string");
+        assertEquals("source", a[3][0]);
+        assertEquals("ILCE-6000", DevTools.about(null, "ILCE-6000", "2.4")[1][1]);
+    }
+
+    @Test void theKeysLineSortsPresentAbsentAndUnknown() {
+        int[] scans = { Keys.K_FN, Keys.K_AEL, Keys.K_C1, Keys.K_ZOOM_T };
+        assertEquals("has FN C1  ·  lacks AEL  ·  unknown ZOOM_T", DevTools.keysFound(scans, new Boolean[] { true, false, true, null }));
+        assertEquals("has FN AEL", DevTools.keysFound(new int[] { Keys.K_FN, Keys.K_AEL }, new Boolean[] { true, true }));
+        assertEquals("the camera would not say", DevTools.keysFound(scans, new Boolean[4]), "a probe that failed says so, not an empty line");
+        assertEquals("lacks FN AEL", DevTools.keysFound(new int[] { Keys.K_FN, Keys.K_AEL }, new Boolean[] { false, false }),
+                "a body that answers with only absent keys did answer (an A5100 without Fn and AEL)");
+    }
+
+    // ---- the key logger
+    @Test void aLogLineCarriesTheScanCodeFirst() {
+        String[] down = DevTools.logLine(true, 595, 0, 1103);
+        assertEquals("down 595", down[0]);
+        assertEquals("DELETE  ·  repeat 0  ·  logic 1103", down[1]);
+        String[] up = DevTools.logLine(false, 9999, 2, null);
+        assertTrue(up[0].startsWith("up") && up[0].endsWith("9999"), up[0]);
+        assertEquals("?  ·  repeat 2", up[1], "an unknown code and no logic code");
+    }
+
+    @Test void theLoggerTitleNamesTheBody() {
+        assertEquals("KEY LOGGER  ·  ILCE-5100  ·  2.7", DevTools.logTitle("ILCE-5100", "2.7"));
+        assertEquals("KEY LOGGER  ·  unknown  ·  unknown", DevTools.logTitle(null, null));
     }
 
     // ---- the settle delay

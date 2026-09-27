@@ -10,9 +10,10 @@ see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 - [Source layout](#source-layout)
 - [Settings slots](#settings-slots)
-- [Developer menu](#developer-menu-c1)
+- [App menu and developer menu](#app-menu-and-developer-menu)
 - [Exit rule](#exit-rule)
 - [Live preview](#live-preview)
+- [Keys on every body](#keys-on-every-body)
 - [Developing on WSL](#developing-on-wsl)
 - [Building](#building)
 - [Unit tests](#unit-tests)
@@ -30,24 +31,33 @@ src/com/voxivoid/recipelab/
   MainActivity.java            UI state, key handling, the camera (CameraEx via reflection), store + sync
   Params.java                  the parameter rows: slot ids, store encodings, preview parameters, chip
                                navigation, HUD strings — pure functions, no Android, covered by test/
-  Recipes.java                 the 77 recipes, brands, GROUP_START / GROUP_COUNT, table navigation
+  Recipes.java                 the 77-entry table (76 recipes + the factory look, FACTORY, which only Reset settings
+                               reaches), brands, GROUP_START / GROUP_COUNT, list navigation that skips FACTORY
   Favourites.java              the favourites list: stored by name in the app's preferences, and how the browser
                                walks the Favourites group — pure functions, no Android, covered by test/
-  DevTools.java                the developer menu rows and the sample run's delays, messages and manifest —
-                               pure functions, no Android, covered by test/
+  DevTools.java                the app menu and developer menu rows, the About and key-logger lines, and the sample
+                               run's delays, messages and manifest — pure functions, no Android, covered by test/
+  Keys.java                    scan codes, the press / hold gesture, the trash-hold guard, and the legend for the
+                               keys a body has — pure functions, no Android, covered by test/
+  KeyProbe.java                asks the camera which keys it has and which model it is (Sony classes by reflection);
+                               every answer is null off the camera — no Android, covered by test/
   res/raw/ids.txt              every settings entry of 16 bytes or less, used by the snapshot/diff tool
   PickerView.java              Canvas-drawn brand browser (Favourites first, then the brands)
-  MenuView.java                Canvas-drawn modal list: the developer menu behind C1
+  MenuView.java                Canvas-drawn full-screen list: the app menu, the developer menu (rows, some with a
+                               value left / right change in place, between drawn arrows), and read-only pages
+                               (About, the key logger)
   Legend.java                  Canvas-drawn key icons and the favourite star, fit-to-width (camera font has no symbol glyphs).
-                               The legend names the keys a body may not have; the four-way and the wheel are left out
-                               as self-evident, and a hold is the centre-button icon labelled "(hold)"
+                               Draws what Keys.hints builds: the four-way and the wheel are left out as self-evident,
+                               a hold is its key's icon labelled "(hold)", and Fn, where the body has it, sits before
+                               MENU when both close the list ("Fn / MENU close")
   StarView.java                the star next to the recipe name when it is a favourite
   HintBar.java                 legend view under the panel (uses Legend)
   NativeBackup.java            JNI: read / write / attr / sync
 jni/jni.cpp                    Backup_read / Backup_write / Backup_sync_all via OpenMemories-Platform
 jni/platform/                  git submodule: ma1co/OpenMemories-Platform
 res/                           layout, shape drawables, launcher icon
-test/com/voxivoid/recipelab/   JUnit tests for Recipes and Params (see Unit tests)
+test/com/voxivoid/recipelab/   JUnit tests for the camera-free classes (see Unit tests)
+test/com/sony/scalar/sysutil/  test doubles of the Sony classes KeyProbe reflects on
 build.sh                       the build: ndk-build, aapt, javac, d8, zipalign, apksigner
 build.cmd                      the same seven steps on Windows
 tools/                         version computation, bumping, the unit tests, and the CI gates
@@ -74,20 +84,34 @@ Found by disassembling the camera app's parameter registration in `libObj.so`):
 | Quality: file format | `0x01070013` (+ mirror `0x01070aa9`) | RAW = 1, RAW+JPEG = 2, JPEG = 0 (verified) |
 | Quality: JPEG level | `0x01070014` (+ mirror `0x01070aaa`) | Std = 0, Fine = 1 (verified) |
 
-## Developer menu (C1)
+## App menu and developer menu
 
-**C1** opens a modal list of the tools that are not part of using the app (`MenuView`, rows and strings in
-`DevTools`). Up / down or the wheel move, the centre button runs a row, MENU or C1 closes it:
+**Holding MENU** (600 ms) on the live screen opens the app menu, full screen (`MenuView`, rows and strings in `DevTools`). Up /
+down or the wheel move, the centre button runs a row, a short MENU goes back a level and then closes it. It opens on
+**Browse recipes**, so a body without Fn is hold MENU → centre away from the brand list:
+
+| row | what it does |
+|---|---|
+| **Browse recipes** | the brand list, as Fn opens it |
+| **Panel visibility** | a value — *Full* / *Label* / *Hidden* — that left / right step through in place, wrapping, with the menu left open; centre steps forward. The same states trash cycles |
+| **Reset settings** | asks `DevTools.RESET_TITLE` (Cancel highlighted), then stages `Recipes.FACTORY` and stores it (`writeAll`, so the quality prompt still asks when it must). The only way to the factory look besides holding trash: it is not in the list |
+| **About** | the installed version (from `PackageManager` — never a string in the source, `tools/check-version.sh`), `model.name`, `version.platform`, and the source URL |
+| **Developer >** | the developer menu below |
+
+A row with a value (`DevTools.appValue` / `rowValue`) draws it at its right edge between two arrows, and the legend
+swaps "select" for "change" while such a row is highlighted.
+
+The **developer menu** holds the tools that are not part of using the app:
 
 | row | what it does |
 |---|---|
 | **Settings snapshot** / **Settings diff** | the snapshot / diff tool below; the row's name says which half is next |
 | **Read-only check — 26 slots** | the read-only check below: does this body flag any slot a recipe writes |
 | **Shoot samples — 77 recipes** | the sample run below |
-| **Settle delay — 1.2 s** | the delay the sample run waits after applying a recipe; the centre button cycles 0.8 / 1.2 / 2.0 / 3.0 / 5.0 s, kept in the app's preferences |
+| **Settle delay** | a value — the delay the sample run waits after applying a recipe; left / right step through 0.8 / 1.2 / 2.0 / 3.0 / 5.0 s in place (centre steps forward), kept in the app's preferences |
+| **Key logger** | every key event on screen, newest first, and appended to `keys.txt` in `getFilesDir()`: scan code, down / up, repeat count, Sony's logic code; the header is the model, the platform and what the probe found. Nothing else happens while it runs; **hold MENU** leaves |
 
-C1 is missing on several supported bodies (issue #18), which is fine for a developer menu and would not be for
-anything in the app proper — see [Centre button hold](#centre-button-hold).
+New functions go in as app menu rows, not on new keys — see [Keys on every body](#keys-on-every-body).
 
 ### Snapshot / diff tool
 
@@ -172,16 +196,61 @@ Goes through `Camera.Parameters`: `color-mode`, `saturation`, `contrast`, `sharp
 `whitebalance`, `color-temperture-white-balance`, `light-balance-for-white-balance`,
 `color-compensation-for-white-balance`, `rgb-matrix` (Q10, 1.0 = 1024) + `rgb-matrix-mode`, `picture-effect`,
 `exposure-compensation` (1/3 EV steps), `dro-mode` + `dro-level`.
-**Key scan codes:** wheel 522 / 523, top dial 525 / 526, AEL 532, C1 622, Fn 520, trash 595, centre 232, MENU 514.
+**Key scan codes** (all in `Keys`, Sony's `ScalarInput` names): wheel 522 / 523, top dial 525 / 526, four-way 103 /
+108 / 105 / 106, centre 232, MENU 514 (SK1 229 on the NEX bodies), trash 595 (SK2 513), shutter 516 / 518, Fn 520.
+Read but not bound: AEL 532, C1 622, DISP 608, PLAY 207 (all swallowed), MOVIE 515 and the zoom lever 610 / 611 (passed on).
 
-## Centre button hold
+## Keys on every body
 
-The centre button is the one key every PlayMemories body has, so anything new that needs a key goes on a **hold** of it
-rather than on Fn / AEL / C1, which several bodies lack (issue #18). Today a hold (`HOLD_MS`, 600 ms) marks the recipe
-as a favourite. To make room for it, ENTER's short action — store on the main screen, pick in the browser, focus a chip —
-runs on the key **release** instead of the press; a hold that has fired swallows the release. The hold is timed with a
-`Handler.postDelayed` armed on the press and cancelled on the release, so it does not depend on the firmware
-delivering key-repeat events. Held keys are cleared in `onPause`.
+Issue #18. The A6000 has Fn, AEL and C1; the A5100 and A5000 have none of them, the A7S II's AEL did nothing in both
+reports, and the compacts differ again. So every function has a route on keys **every** body has — wheel, four-way,
+centre, MENU, trash, shutter — and Fn is the one shortcut on top:
+
+| function | every body | shortcut |
+|---|---|---|
+| store the recipe | centre | — |
+| favourite | hold centre | — |
+| brand list | hold MENU → Browse recipes | Fn |
+| hide the panel | trash, or hold MENU → Panel visibility | — |
+| reset to factory | hold trash, or hold MENU → Reset settings — both ask first | — |
+| developer tools | hold MENU → Developer | — |
+| exit | MENU | — |
+
+**Unbound on purpose.** Trash hides the panel on every body, so AEL — missing on the A5100 / A5000, dead on the A7S II —
+adds nothing. C1 only ever opened the developer menu, which the app menu now reaches. DISP is dropped because
+of what it might be on a body where it is printed on the wheel's top (A6000, A5100, A7 bodies): there the press arrives
+as `K_UP` — chip navigation works on the A6000 — but a body that sent 608 for it would have its wheel-up hide the panel
+or close the list. All three are swallowed on every screen and shown by the key logger.
+
+**Holds.** Three keys have a press and a hold (`Keys.Hold`, `HOLD_MS` 600 ms): centre (pick / favourite), MENU (exit /
+app menu) and trash (hide / ask to reset). The hold is timed with a `Handler.postDelayed` armed on the press and
+cancelled on the release, so it does not depend on the firmware delivering key-repeat events. Centre and MENU run their
+press action on the **release**; a hold that has fired swallows the release. Trash too: it hides the panel (or closes
+the brand list) on the release, and a hold brings up the reset question instead, so holding it never touches the panel.
+The question defaults to Cancel, and the legend never names the hold: it is there for whoever needs it, not as an
+invitation. Holds are cleared in `onPause`, and the release bookkeeping runs whatever is on screen, so a release that
+lands on a prompt does not leave a key stuck.
+
+**The trash hold and a lost release.** A fired timer means the key is still down — the release would have cancelled it
+— except on a body that loses the release. So when `ScalarInput.getKeyStatus(scan).status` says the key is already up,
+the fired hold counts as a press and hides (`Keys.trashHoldActs`); when the camera will not say, it is a hold, and the
+worst case is a question that defaults to Cancel.
+
+**Repeat.** A key-repeat (`getRepeatCount() > 0`) of centre, MENU, trash or Fn is dropped, so a held Fn no longer
+opens and then closes the list; the four-way and the dials keep theirs.
+
+**Which keys a body has.** `KeyProbe` asks `com.sony.scalar.sysutil.ScalarInput.getKeyStatus(scan).valid` by reflection,
+once per key — how Sony's own app framework counts dials and gates the zoom lever. The legend names Fn only when it
+reads 1; when the call is missing or throws, the legend names the universal keys alone. There is no per-model table: nobody can keep one verified. Model and platform come from
+`ScalarProperties.getString("model.name" / "version.platform")` — `Build.MODEL` is `ScalarA` on every body — and are
+only shown, never branched on. None of this has been checked on a camera yet; the key logger is how it will be.
+
+**Not done yet, until the logger has codes to show:** still review on PLAY (#43), the A7 II AF/MF–AEL lever codes
+(589 / 638), what to do with the zoom lever and flash (HX60, #42), and swapping the top dial's
+direction on the platform-1 NEX bodies, which Sony's framework does.
+
+On the first launch of a build with these keys a toast says where things went (`Keys.NOTICE`, once, pref
+`keysNoticeSeen`).
 
 Favourites live in `getPreferences(MODE_PRIVATE)` under `favourites`, as recipe **names** joined with `|` (so a table
 that gains a recipe does not shift the marks); a name the table no longer has is dropped on load. They are app storage,
@@ -319,14 +388,17 @@ tests pin it down:
 
 | | |
 |---|---|
-| `RecipesTest` | the table itself — 77 recipes, group order, every value inside its row's range, kelvin in whole hundreds, sub-parameters that exist for the effect; labels, `summary()`, wrap-around navigation |
+| `RecipesTest` | the table itself — 77 entries (76 listed + the factory look, which navigation skips), group order, every value inside its row's range, kelvin in whole hundreds, sub-parameters that exist for the effect; labels, `summary()`, wrap-around navigation |
 | `ParamsCodecTest` | how the store encodes each row (DRO bytes, PP3 for the matrix, magenta-positive G-M, the quality pair, signed vs unsigned slots) and how it reads back |
 | `ParamsWritesTest` | which bytes ENTER writes for a recipe — golden lists for a few, and every recipe stored over a factory camera, then on top of each other, read back through the same decoder |
 | `ParamsPreviewTest` | the `Camera.Parameters` the live preview sets, recipe by recipe |
 | `ParamsChipsTest` | chip visibility, stepping (wrap vs clamp, the effect → SUB / quality side effects), LEFT/RIGHT and UP/DOWN landing spots, chip text |
 | `ParamsHudTest` | the meta line, the minimal pill, the quality prompt |
 | `ParamsToolsTest` | the snapshot tool's id list — including that `res/raw/ids.txt` is well formed and lists every slot the app writes — and its diff lines |
-| `DevToolsTest` | the developer menu's rows and settle delays, the sample run's progress / finish lines, and its manifest — a parsable line per recipe, in run order |
+| `DevToolsTest` | the app menu and developer menu rows, About and the key logger's lines, settle delays, the sample run's progress / finish lines, and its manifest — a parsable line per recipe, in run order |
+| `KeysTest` | the press / hold gesture, the trash-hold guard, and that the legend never names a key the body lacks — every function on a universal key, Fn only when reported, the order pick · browse · fav · menu · hide · exit, the reset hold never hinted |
+| `KeyProbeTest` | that the key probe answers "unknown" off the camera instead of throwing |
+| `KeyProbeCameraTest` | the key probe against test doubles of Sony's `ScalarInput`, `KeyStatus` and `ScalarProperties` (`test/com/sony/scalar/sysutil/`, shaped like the OpenMemories-Framework stubs): the reflection finds the real signatures, only `valid == 1` is a key, only `status == 1` is a press. The doubles throw for anything a test did not set up, which is how the "off the camera" answers stay null |
 | `FavouritesTest` | the favourites list — stored by name, unknown names dropped, marking order kept, toggle, the highlight after a removal — and the browser's group order with Favourites first |
 
 **What is not, and cannot be.** `MainActivity` (key dispatch, overlays, the camera and the JNI store), the
@@ -335,8 +407,8 @@ Android runtime; there is no Gradle and no Robolectric here, and a mock of `Came
 stay on the [on-camera checklist](CONTRIBUTING.md#on-the-camera). Likewise the slot ids themselves: a
 test can show that the app writes `0x01070175 = 6`, not that the camera means B&W by it.
 
-**Keeping it that way.** New logic that does not need the camera goes into `Params` (or `Recipes`, `Favourites`, or a
-new class listed in `UNITS` in `tools/test.sh`) with a test next to it, and is called from `MainActivity`, never the
+**Keeping it that way.** New logic that does not need the camera goes into `Params` (or `Recipes`, `Favourites`,
+`DevTools`, `Keys`, `KeyProbe`, or a new class listed in `UNITS` in `tools/test.sh`) with a test next to it, and is called from `MainActivity`, never the
 other way round. `tools/test.sh` compiles those classes without `android.jar` on purpose: an `android.*` import in either fails there before it fails in CI. Tests
 are plain JUnit 5 (`org.junit.jupiter.api`), one behaviour per method, no mocking library; `Fixtures` has a
 factory-fresh camera as rows and as store bytes and a fake store to write into.
