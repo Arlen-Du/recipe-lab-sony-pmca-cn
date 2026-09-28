@@ -1,6 +1,6 @@
 # Recipe Lab — agent rules
 
-A PlayMemories (PMCA) camera app for the Sony A6000: 78 film-look recipes written straight into the
+A PlayMemories (PMCA) camera app for the Sony A6000: 77 film-look recipes, plus a factory reset, written straight into the
 camera's settings store. Native lib (ndk-build, NDK r16b) + Java, no Gradle.
 
 Read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) before changing anything.
@@ -72,10 +72,12 @@ Closes #123
 - The `errno.h` park must stay reversible (`build.sh` does it from an `EXIT` trap). A build that leaves the
   submodule dirty is a bug.
 - `./tools/test.sh` runs the unit tests: the `test` CI job, also run by `dev-build` and `create-release`; JDK 17 only, no SDK. Logic that needs no camera
-  goes in `Params.java`, `Recipes.java` or `Favourites.java` **with a test**, never into `MainActivity`. All three are
-  compiled there **without** `android.jar`, so an `android.*` import in any of them breaks the job.
-- **New key bindings go on keys every body has** (wheel, four-way, centre, MENU, shutter, TRASH) — a hold of the centre
-  button is the escape hatch. Fn, AEL, C1 and DISP are missing on several supported bodies (issue #18).
+  goes in `Params.java`, `Recipes.java`, `Favourites.java`, `DevTools.java`, `Keys.java` or `KeyProbe.java` **with a
+  test**, never into `MainActivity`. All of them are compiled there **without** `android.jar`, so an `android.*` import
+  in any of them breaks the job.
+- **Every function needs a route on keys every body has** (wheel, four-way, centre, MENU, shutter, TRASH). A new
+  function becomes a row of the app menu (hold MENU), not a new key. Fn is the one shortcut; AEL, C1 and DISP are not
+  bound (issue #18). The legend names Fn only when `KeyProbe` reports the key — never a per-model table.
 
 ## What CI cannot check
 

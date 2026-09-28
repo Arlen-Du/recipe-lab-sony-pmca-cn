@@ -16,6 +16,23 @@ class I18nTest {
         assertEquals("退出", I18n.t("exit"));
         assertEquals("修改", I18n.t("edit"));
         assertEquals("完成", I18n.t("done"));
+        assertEquals("菜单(长按)", I18n.t("menu (hold)"));
+        assertEquals("返回", I18n.t("back"));
+        assertEquals("切换", I18n.t("change"));
+        assertEquals("退出(长按)", I18n.t("exit (hold)"));
+    }
+
+    @Test
+    void appMenuAndResetTranslations() {
+        assertEquals("重置设置", I18n.t(DevTools.appLabel(DevTools.APP_RESET)));
+        assertEquals("浏览配方", I18n.t(DevTools.appLabel(DevTools.APP_BROWSE)));
+        assertEquals("面板显示", I18n.t(DevTools.appLabel(DevTools.APP_PANEL)));
+        assertEquals("关于", I18n.t(DevTools.appLabel(DevTools.APP_ABOUT)));
+        assertEquals("开发者选项  >", I18n.t(DevTools.appLabel(DevTools.APP_DEV)));
+        assertEquals("重置为出厂设置？", I18n.t(DevTools.RESET_TITLE));
+        assertEquals("重置", I18n.t(DevTools.RESET_OPTIONS[0]));
+        assertEquals("取消", I18n.t(DevTools.RESET_OPTIONS[1]));
+        assertEquals("长按 MENU 打开菜单  ·  删除键隐藏面板  ·  长按删除键重置", I18n.tToast(Keys.NOTICE));
     }
 
     @Test

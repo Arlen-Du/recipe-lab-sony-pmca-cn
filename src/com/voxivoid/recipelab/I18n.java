@@ -34,6 +34,10 @@ public final class I18n {
         DICT.put("exit", "退出");
         DICT.put("edit", "修改");
         DICT.put("done", "完成");
+        DICT.put("menu (hold)", "菜单(长按)");
+        DICT.put("back", "返回");
+        DICT.put("change", "切换");
+        DICT.put("exit (hold)", "退出(长按)");
 
         // ---- Browser (PickerView)
         DICT.put("BRAND", "品牌");
@@ -59,18 +63,38 @@ public final class I18n {
         DICT.put("Other Stocks", "其他");
         DICT.put("Ilford", "伊尔福");
 
-        // ---- PromptView
+        // ---- PromptView & Reset Question
         DICT.put("confirm", "确定");
         DICT.put("cancel", "取消");
         DICT.put("Accept", "确定");
         DICT.put("Cancel", "取消");
+        DICT.put("Reset", "重置");
+        DICT.put("Reset to factory settings?", "重置为出厂设置？");
+        DICT.put("Stores Standard 0 / 0 / 0, auto white balance, no effect, in place of the current look", "将当前设置恢复为标准 0 / 0 / 0、自动白平衡、无照片效果");
         DICT.put("quality slot not located yet — live view only", "画质槽位未知 — 仅限预览");
 
-        // ---- Dev menu (MenuView / DevTools)
+        // ---- App menu & Dev menu (MenuView / DevTools)
+        DICT.put("RECIPE LAB", "RECIPE LAB");
         DICT.put("DEV TOOLS", "开发菜单");
+        DICT.put("ABOUT", "关于");
+        DICT.put("Browse recipes", "浏览配方");
+        DICT.put("Panel visibility", "面板显示");
+        DICT.put("Reset settings", "重置设置");
+        DICT.put("About", "关于");
+        DICT.put("Developer  >", "开发者选项  >");
+        DICT.put("Brands and favourites", "品牌与收藏");
+        DICT.put("What stays over the live image — left / right to change", "屏幕信息面板显示状态 — 方向键左右切换");
+        DICT.put("Back to the camera's factory look", "恢复相机出厂设置");
+        DICT.put("Version, camera, platform", "版本号、机型、平台");
+        DICT.put("Settings snapshot, read-only check, samples, key logger", "设置快照、只读检查、样片拍摄、按键日志");
+        DICT.put("Full", "完整");
+        DICT.put("Label", "微标");
+        DICT.put("Hidden", "隐藏");
+        DICT.put("version", "版本");
+        DICT.put("camera", "机型");
+        DICT.put("platform", "平台");
+        DICT.put("source", "源码");
         DICT.put("move", "移动");
-
-
         DICT.put("select", "确定");
         DICT.put("Settings snapshot", "设置快照");
         DICT.put("Settings diff", "设置对比");
@@ -78,8 +102,13 @@ public final class I18n {
         DICT.put("Compare every settings id against the snapshot", "对比当前设置与快照");
         DICT.put("Test every slot a recipe writes for the read-only flag", "测试配方写入项是否只读");
         DICT.put("One JPEG per recipe, in table order — MENU stops the run", "自动连拍所有配方, 按MENU停止");
+        DICT.put("Settle delay", "稳定延时");
         DICT.put("Wait after applying a recipe before the shutter fires", "应用配方后的快门等待时间");
+        DICT.put("Wait after applying a recipe before the shutter fires — left / right to change", "应用配方后的快门等待时间 — 方向键左右切换");
+        DICT.put("Key logger", "按键日志");
+        DICT.put("Show every key's scan code — hold MENU to leave", "显示所有按键的扫描码 — 长按 MENU 退出");
         DICT.put("No live preview — the sample run needs the camera", "无实时预览 — 需要相机");
+        DICT.put("Hold MENU for the menu  ·  trash hides the panel  ·  hold trash to reset", "长按 MENU 打开菜单  ·  删除键隐藏面板  ·  长按删除键重置");
 
         // ---- Common values
         DICT.put("auto", "自动");
