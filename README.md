@@ -5,7 +5,7 @@
 <h1 align="center">Recipe Lab</h1>
 
 <p align="center">
-  Film simulations and camera looks for the <b>Sony A6000</b>, stored in the camera itself.<br>
+  Film simulations and camera looks for the <b>Sony</b> cameras that support <b>PlayMemories Camera Apps</b>, stored in the camera itself.<br>
   <sub>
     <img src="https://img.shields.io/github/v/release/voxivoid/recipe-lab-sony-pmca?label=version" alt="version"> ·
     <a href="https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest/download/RecipeLab.apk">Download the app</a> ·
@@ -13,16 +13,21 @@
   </sub>
 </p>
 
+<h3 align="center">Do you love this project? Sponsor it!</h3>
+
 <p align="center">
   <a href="https://github.com/sponsors/voxivoid"><img
-    src="https://img.shields.io/badge/Sponsor_this_project-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white&style=for-the-badge"
-    alt="Sponsor this project"></a>
+    src="https://img.shields.io/badge/Sponsor_on_GitHub-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white&style=for-the-badge"
+    alt="Sponsor on GitHub"></a>
+  <a href="https://ko-fi.com/voxivoid"><img
+    src="https://img.shields.io/badge/Tip_on_Ko--fi-%E2%98%95-ff5e5b?logo=kofi&logoColor=white&style=for-the-badge"
+    alt="Tip on Ko-fi"></a>
 </p>
 
 <p align="center">
   <sub>
     The app is free and stays free. Sponsoring pays for keeping it maintained, for building new features, and for
-    buying the cameras it has to be tested on — every body beyond the A6000 is one someone has to own.
+    buying the cameras it has to be tested on — I currently only own a Sony a6000.
   </sub>
 </p>
 
@@ -32,14 +37,14 @@
 
 - [What it is](#what-it-is)
 - [The recipes](#the-recipes)
-- [Sample frames](docs/SAMPLES.md)
 - [Compatibility](#compatibility)
+  - [Cameras that run PlayMemories apps](#cameras-that-run-playmemories-apps)
+  - [Cameras that cannot run camera apps](#cameras-that-cannot-run-camera-apps)
 - [Installing](#installing)
 - [Using it](#using-it)
 - [What it changes](#what-it-changes)
 - [Uninstalling](#uninstalling)
 - [Troubleshooting](#troubleshooting)
-- [FAQ](docs/FAQ.md)
 - [For developers](#for-developers)
 - [Credits](#credits)
 
