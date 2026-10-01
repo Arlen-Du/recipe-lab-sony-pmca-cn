@@ -158,6 +158,13 @@ Recipe Lab running on an A6400 or similar are mistaken.
 Takes about ten minutes, once. You need the camera, its USB cable, a memory card and a computer (Windows, Mac or
 Linux).
 
+Rather watch it done? [u/wemax141](https://www.reddit.com/user/wemax141/) made a video walkthrough:
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=-FpsmLYZcF8"><img src="https://img.youtube.com/vi/-FpsmLYZcF8/hqdefault.jpg"
+    alt="How to Install Recipe Lab on a Sony A6000 (or Any Compatible Camera)"></a>
+</p>
+
 **1. Get the installer tool.** It is called *Sony-PMCA-RE*, made by ma1co. It puts apps on Sony cameras the same way
 Sony's own app store did before it closed.
 
