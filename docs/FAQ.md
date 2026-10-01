@@ -50,6 +50,10 @@ Yes — that is the whole point. Storing a recipe writes it into the camera's se
 photo and video, with Recipe Lab closed and after a power cycle. What the app shows *before* you store is only a live
 preview, and that disappears when you leave the app.
 
+The exception is the mode dial's **MR** / **1** / **2** (Memory Recall) positions: they load the settings registered
+there at power-on, over the stored recipe. Shoot from P, A, S or M, or register the recipe to the slot from the
+camera's menu.
+
 ## Will it work on my camera?
 
 If your camera can run PlayMemories camera apps, it should install. Whether the stored values land correctly is the

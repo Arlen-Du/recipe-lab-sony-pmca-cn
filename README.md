@@ -109,31 +109,31 @@ Failures are as useful as successes.
 
 | camera | model code | status | comment |
 |---|---|---|---|
-| **A6000** | ILCE-6000 | ✅ | built and tested on it, firmware 3.21 |
-| **A6500** | ILCE-6500 | ✅ | installs, stores, survives a power cycle |
-| **A5100** | ILCE-5100 | ✅ | works, and the wheel scrolls every recipe. The body has no **Fn** button: the brand list is under **hold MENU → Browse recipes**, and **TRASH** (the **? / Delete** button) hides the panel — not yet confirmed on this body ([#18](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/18)) |
-| **A7 II** | ILCE-7M2 | ✅ | reported working |
-| **A7** | ILCE-7 | ✅ | two reports, both firmware 3.20 — stores and survives a power cycle. The first reporter had unlocked the settings store with OpenMemories-Tweak; the second did not need to ([#51](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/51)) |
-| **NEX-5T** | NEX-5T | ✅ | oldest app-capable generation; installs, stores and survives a power cycle on firmware 1.1, reported on app 1.0 — but that report also said the stored values did not all match, and named menu labels reading differently on this body, which is still unresolved ([#22](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/22)) |
-| **A6300** | ILCE-6300 | ✅ | stores and survives a power cycle, firmware 2.01 |
-| **A7R** | ILCE-7R | ✅ | stores and survives a power cycle, firmware 3.2 |
-| **A7R II** | ILCE-7RM2 | ✅ | three reports, firmware 4.00 and 4.01 — stores and survives a power cycle ([#46](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/46)) |
-| **RX100 V** | DSC-RX100M5 | ✅ | stores and survives a power cycle, firmware 2.00 |
-| **HX60 / HX60V** | DSC-HX60 | ✅ | stores, survives a power cycle and the menus match, firmware 2.10, reported on app 1.1.0 — the report says zoom and flash could not be used ([#42](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/42)) |
-| **A7S II** | ILCE-7SM2 | ✅ | two reports on firmware 3.01, and they disagree. One stored a recipe that survived a power cycle, on an unofficial Chinese build of 1.3.1 ([#52](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/52)). The other got the app's stored confirmation but lost the look once the app closed, and the image stabiliser misbehaved with a manual lens while the app was open ([#48](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/48)). Both say the **AEL** button does nothing. If a look vanishes on this body, check that Picture Profile is Off (see [Troubleshooting](#troubleshooting)) |
-| **RX100 III** | DSC-RX100M3 | ✅ | stores and survives a power cycle, firmware 2.0 ([#47](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/47)) |
-| **RX1R II** | DSC-RX1RM2 | ✅ | stores and survives a power cycle, firmware 1.0 ([#53](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/53)) |
-| A5000 | ILCE-5000 | ❔ | as with the A5100, expect no **Fn** button — the brand list is under **hold MENU**, and **TRASH** hides the panel |
+| **A6000** | ILCE-6000 | ✅ | built and tested on it |
+| **A6500** | ILCE-6500 | ✅ |  |
+| **A5100** | ILCE-5100 | ✅ | no **Fn** button: the brand list is under **hold MENU → Browse recipes** |
+| **A7 II** | ILCE-7M2 | ✅ |  |
+| **A7** | ILCE-7 | ✅ |  |
+| **NEX-5T** | NEX-5T | ✅ | the stored values did not all match, and some menu labels read differently ([#22](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/22)) |
+| **A6300** | ILCE-6300 | ✅ |  |
+| **A7R** | ILCE-7R | ✅ |  |
+| **A7R II** | ILCE-7RM2 | ✅ |  |
+| **RX100 V** | DSC-RX100M5 | ✅ |  |
+| **HX60 / HX60V** | DSC-HX60 | ✅ | zoom and flash could not be used ([#42](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/42)) |
+| **A7S II** | ILCE-7SM2 | ✅ | the image stabiliser misbehaved with a manual lens while the app was open ([#48](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/48)) |
+| **RX100 III** | DSC-RX100M3 | ✅ |  |
+| **RX1R II** | DSC-RX1RM2 | ✅ |  |
+| **A5000** | ILCE-5000 | ✅ | no **Fn** button: the brand list is under **hold MENU → Browse recipes**; one sample run froze the camera after about eight frames, and only pulling the battery brought it back ([#58](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/58)) |
+| **HX90 / HX90V** | DSC-HX90 | ✅ |  |
 | A7S | ILCE-7S | ❔ |  |
-| NEX-5R | NEX-5R | ❔ | oldest app-capable generation |
+| NEX-5R | NEX-5R | ❔ |  |
 | NEX-6 | NEX-6 | ❔ | menus differ a lot from the A6000 generation, so the settings are the least likely to sit in the same place |
-| A68 | ILCA-68 | ❔ | A-mount; not in the installer's device table either, so even the install is untested |
-| A77 II | ILCA-77M2 | ❔ | A-mount |
-| A99 II | ILCA-99M2 | ❔ | A-mount |
+| A68 | ILCA-68 | ❔ | not in the installer's device table, so even the install is untested |
+| A77 II | ILCA-77M2 | ❔ |  |
+| A99 II | ILCA-99M2 | ❔ |  |
 | RX100 IV | DSC-RX100M4 | ❔ |  |
 | RX10 II | DSC-RX10M2 | ❔ |  |
 | RX10 III | DSC-RX10M3 | ❔ |  |
-| HX90 / HX90V | DSC-HX90 | ❔ | compact; no control wheel of the kind the app is driven with |
 | HX400 / HX400V | DSC-HX400 | ❔ | compact; no control wheel of the kind the app is driven with |
 | WX500 | DSC-WX500 | ❔ | compact; no control wheel of the kind the app is driven with |
 
@@ -314,6 +314,7 @@ The common questions — RAW files, damage, LUTs, newer bodies — are in the **
 | Stuck at `Waiting for camera to switch...` | Unplug, turn the camera off and on, reconnect, run again |
 | `Not written — the camera holds these settings read-only` or `WRITE FAILED` | The camera refused the recipe. Install [OpenMemories-Tweak](https://github.com/ma1co/OpenMemories-Tweak), open **Protection**, tick *Unlock protected settings* until it reads *Protection disabled*, then pick the recipe again |
 | Look not applied after picking a recipe | Turn the camera off and on |
+| Look gone after a power cycle, or the recipe will not store, with the mode dial on **MR** / **1** / **2** | Memory Recall loads the settings registered to that position at power-on, over whatever the app stored. Turn the dial to P, A, S or M, store the recipe again, and register it to the MR slot from the camera's menu if you want it there ([#59](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/59)) |
 | Look right in the app, gone once you leave it | If your camera has a **Picture Profile** menu (the A6000 does not), set `MENU → Picture Profile` to *Off* and pick the recipe again. While a Picture Profile runs, the camera ignores Creative Style and its sliders. Older recipes that used the colour matrix could switch PP3 on themselves on these bodies ([#38](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/38)); picking any recipe now switches it off |
 | `no live preview: ...` in the panel | Something else is holding the camera; close and reopen the app |
 | Text shows `Â·` | Old build; install the APK from the [latest release](https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest) |
