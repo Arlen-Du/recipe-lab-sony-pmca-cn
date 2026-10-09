@@ -111,7 +111,7 @@ not the same thing.
 
 ## Are there sample photos of each recipe?
 
-Yes — **[docs/SAMPLES.md](SAMPLES.md)**. All 77 recipes on one subject, in one light, at one fixed exposure
+Yes — **[docs/SAMPLES.md](SAMPLES.md)**. All 78 recipes on one subject, in one light, at one fixed exposure
 (1/30, f/4.5, ISO 250), straight out of the camera and not edited, downscaled to 900 px so the page stays light.
 Nothing that touches colour was done to them.
 

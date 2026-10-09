@@ -1,6 +1,6 @@
 # Sample frames
 
-Every one of the 77 recipes, on the same subject, in the same light, straight out of the camera.
+Every one of the 78 recipes, on the same subject, in the same light, straight out of the camera.
 
 One frame per recipe, shot in one run by the app's own [sample run](DEVELOPMENT.md#sample-run): it applies recipe *n*,
 waits for the preview pipeline, fires the shutter, moves on. Nothing here is edited. The frames are downscaled to
@@ -9,7 +9,7 @@ These copies are all that is published: the full-size frames are 500 MB, which i
 whose whole point is a 200 KB app.
 
 **How they were shot.** ILCE-6001, firmware v3.21, tripod, indoors in the evening, manual exposure fixed across all
-77 frames: **1/30, f/4.5, ISO 250, 27 mm**. White balance is whatever the recipe says — auto for 69 of them, a fixed
+78 frames: **1/30, f/4.5, ISO 250, 27 mm**. White balance is whatever the recipe says — auto for 69 of them, a fixed
 colour temperature for the 8 that specify one. So every difference below is the recipe, not the light and not the
 exposure.
 

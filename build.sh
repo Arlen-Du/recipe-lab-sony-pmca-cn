@@ -16,10 +16,20 @@ cd "$(dirname "$0")"
 ROOT="$PWD"
 
 # ---- toolchain locations ----
-: "${ANDROID_SDK:=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Android/Sdk}}}"
-: "${ANDROID_NDK:?set ANDROID_NDK to an android-ndk-r16b installation}"
+if [ -z "${ANDROID_SDK:-}" ]; then
+  for cand in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}" "$HOME/Library/Android/sdk" "$HOME/Android/Sdk"; do
+    if [ -n "$cand" ] && [ -d "$cand" ]; then ANDROID_SDK="$cand"; break; fi
+  done
+fi
+: "${ANDROID_SDK:?cannot find Android SDK, please set ANDROID_SDK}"
 : "${BUILD_TOOLS:=30.0.3}"
-: "${PLATFORM_JAR:=$ANDROID_SDK/platforms/android-28/android.jar}"
+if [ -z "${PLATFORM_JAR:-}" ]; then
+  if [ -e "$ANDROID_SDK/platforms/android-28/android.jar" ]; then
+    PLATFORM_JAR="$ANDROID_SDK/platforms/android-28/android.jar"
+  else
+    PLATFORM_JAR="$(ls -1d "$ANDROID_SDK"/platforms/android-*/android.jar 2>/dev/null | sort -V | tail -n 1 || true)"
+  fi
+fi
 BT="$ANDROID_SDK/build-tools/$BUILD_TOOLS"
 if [ -n "${JAVA_HOME:-}" ]; then JAVA="$JAVA_HOME/bin"; else JAVA="$(dirname "$(command -v javac)")"; fi
 # apksigner and keytool are shell wrappers that exec `java` from PATH, so JAVA_HOME on its
@@ -27,9 +37,14 @@ if [ -n "${JAVA_HOME:-}" ]; then JAVA="$JAVA_HOME/bin"; else JAVA="$(dirname "$(
 export PATH="$JAVA:$PATH"
 AJ="$PLATFORM_JAR"
 
-for f in "$AJ" "$BT/aapt" "$BT/zipalign" "$BT/apksigner" "$BT/lib/d8.jar" "$ANDROID_NDK/ndk-build"; do
+for f in "$AJ" "$BT/aapt" "$BT/zipalign" "$BT/apksigner" "$BT/lib/d8.jar"; do
   [ -e "$f" ] || { echo "missing: $f" >&2; exit 1; }
 done
+
+HAS_NDK=0
+if [ -n "${ANDROID_NDK:-}" ] && [ -x "$ANDROID_NDK/ndk-build" ]; then
+  HAS_NDK=1
+fi
 
 # The platform's errno.h shim is for the libc-less updater build; it shadows the NDK's <errno.h>.
 # Park it for the duration of the build — and always put it back, even if the build dies, or the
@@ -39,18 +54,27 @@ trap restore_errno EXIT
 [ -e jni/platform/errno.h ] && mv -f jni/platform/errno.h jni/platform/errno.h.updater_only
 
 # ---- version (single source of truth: AndroidManifest.xml, never mutated by a build) ----
+: "${RELEASE:=1}"
 # shellcheck source=tools/version.sh
 . tools/version.sh
 echo "building $VERSION_NAME (versionCode $VERSION_CODE)"
 
-echo "[0/7] ndk-build (armeabi, android-14 headers, runs on Android 2.3.7)"
-"$ANDROID_NDK/ndk-build" NDK_PROJECT_PATH="$ROOT" APP_BUILD_SCRIPT="$ROOT/jni/Android.mk" \
-  NDK_APPLICATION_MK="$ROOT/jni/Application.mk" NDK_LIBS_OUT="$ROOT/out/libs" \
-  NDK_OUT="$ROOT/out/obj" -j"$(nproc 2>/dev/null || echo 4)"
-
 rm -rf out/gen out/classes out/dex out/apklib
 mkdir -p out/gen out/classes out/dex out/apklib/lib/armeabi
-cp -f out/libs/armeabi/librecipelab.so out/apklib/lib/armeabi/
+
+if [ "$HAS_NDK" = "1" ]; then
+  echo "[0/7] ndk-build (armeabi, android-14 headers, runs on Android 2.3.7)"
+  "$ANDROID_NDK/ndk-build" NDK_PROJECT_PATH="$ROOT" APP_BUILD_SCRIPT="$ROOT/jni/Android.mk" \
+    NDK_APPLICATION_MK="$ROOT/jni/Application.mk" NDK_LIBS_OUT="$ROOT/out/libs" \
+    NDK_OUT="$ROOT/out/obj" -j"$(nproc 2>/dev/null || echo 4)"
+  cp -f out/libs/armeabi/librecipelab.so out/apklib/lib/armeabi/
+elif [ -e "$ROOT/jni/prebuilt/armeabi/librecipelab.so" ]; then
+  echo "[0/7] using prebuilt librecipelab.so (no NDK r16b detected)"
+  cp -f "$ROOT/jni/prebuilt/armeabi/librecipelab.so" out/apklib/lib/armeabi/
+else
+  echo "missing ANDROID_NDK (r16b) and no prebuilt librecipelab.so found" >&2
+  exit 1
+fi
 
 # Version injection: aapt reads this copy, the checked-in manifest stays untouched.
 MANIFEST=out/AndroidManifest.xml
@@ -68,7 +92,7 @@ find out/classes -name '*.class' > out/classes.txt
 "$JAVA/java" -cp "$BT/lib/d8.jar" com.android.tools.r8.D8 --release --min-api 10 \
   --lib "$AJ" --output out/dex "@out/classes.txt"
 echo "[4/7] aapt package + dex + native lib"
-"$BT/aapt" package -f -M "$MANIFEST" -S res -A assets -I "$AJ" -F out/unaligned.apk
+"$BT/aapt" package -f -0 ttf -M "$MANIFEST" -S res -A assets -I "$AJ" -F out/unaligned.apk
 ( cd out/dex   && "$BT/aapt" add ../unaligned.apk classes.dex )
 ( cd out/apklib && "$BT/aapt" add ../unaligned.apk lib/armeabi/librecipelab.so )
 echo "[5/7] zipalign"

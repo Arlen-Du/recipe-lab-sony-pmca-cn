@@ -70,4 +70,4 @@ FILTER=()
 [ -n "${1:-}" ] && FILTER=(--include-classname ".*$1.*")
 "$JAVA/java" -jar "$JUNIT_JAR" execute \
   --class-path "out/test/classes:out/test/test-classes" --scan-class-path \
-  --reports-dir out/test/reports --details=tree --disable-banner --fail-if-no-tests "${FILTER[@]}"
+  --reports-dir out/test/reports --details=tree --disable-banner --fail-if-no-tests ${FILTER[@]+"${FILTER[@]}"}

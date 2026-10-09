@@ -127,7 +127,7 @@ The **developer menu** holds the tools that are not part of using the app:
 |---|---|
 | **Settings snapshot** / **Settings diff** | the snapshot / diff tool below; the row's name says which half is next |
 | **Read-only check — 26 slots** | the read-only check below: does this body flag any slot a recipe writes |
-| **Shoot samples — 77 recipes** | the sample run below |
+| **Shoot samples — 78 recipes** | the sample run below |
 | **Settle delay** | a value — the delay the sample run waits after applying a recipe; left / right step through 0.8 / 1.2 / 2.0 / 3.0 / 5.0 s in place (centre steps forward), kept in the app's preferences |
 | **Key logger** | every key event on screen, newest first, and appended to `keys.txt` in `getFilesDir()`: scan code, down / up, repeat count, Sony's logic code; the header is the model, the platform and what the probe found. Nothing else happens while it runs; **hold MENU** leaves |
 
