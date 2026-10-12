@@ -149,7 +149,7 @@ final class TextZhHans {
         { "about_firmware", "固件" },
         { "about_platform", "平台" },
         { "about_source", "源代码" },
-        { "about_love", "喜欢这个项目吗？欢迎赞助！" },
+        { "about_love", "喜欢这个项目吗？欢迎打赏！" },
         { "dev_title", "开发工具" },
         { "dev_settings_snapshot", "设置快照" },
         { "dev_settings_diff", "设置差异" },

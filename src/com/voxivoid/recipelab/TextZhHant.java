@@ -149,7 +149,7 @@ final class TextZhHant {
         { "about_firmware", "韌體" },
         { "about_platform", "平台" },
         { "about_source", "原始碼" },
-        { "about_love", "喜歡這個專案嗎？歡迎贊助！" },
+        { "about_love", "喜歡這個專案嗎？歡迎打賞！" },
         { "dev_title", "開發工具" },
         { "dev_settings_snapshot", "設定快照" },
         { "dev_settings_diff", "設定差異" },

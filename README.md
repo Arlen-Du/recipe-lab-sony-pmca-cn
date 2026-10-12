@@ -13,21 +13,21 @@
   </sub>
 </p>
 
-<h3 align="center">Do you love this project? Sponsor it!</h3>
+<h3 align="center">Do you love this project? Leave a tip!</h3>
 
 <p align="center">
-  <a href="https://github.com/sponsors/voxivoid"><img
-    src="https://img.shields.io/badge/Sponsor_on_GitHub-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white&style=for-the-badge"
-    alt="Sponsor on GitHub"></a>
   <a href="https://ko-fi.com/voxivoid"><img
     src="https://img.shields.io/badge/Tip_on_Ko--fi-%E2%98%95-ff5e5b?logo=kofi&logoColor=white&style=for-the-badge"
     alt="Tip on Ko-fi"></a>
+  <a href="https://github.com/sponsors/voxivoid"><img
+    src="https://img.shields.io/badge/Sponsor_on_GitHub-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white&style=for-the-badge"
+    alt="Sponsor on GitHub"></a>
 </p>
 
 <p align="center">
   <sub>
-    The app is free and stays free. Sponsoring pays for keeping it maintained, for building new features, and for
-    buying the cameras it has to be tested on — I currently only own a Sony a6000.
+    Recipe Lab is built and maintained by one person. Tips pay for keeping it maintained, for building new features,
+    and for buying the cameras it has to be tested on — I currently only own a Sony a6000.
   </sub>
 </p>
 
