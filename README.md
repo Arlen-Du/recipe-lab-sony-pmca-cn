@@ -407,4 +407,9 @@ on that.
 reference frames on his site were the inspiration and the benchmark for many of the looks here (Kodak, Fuji, Cinestill,
 Ilford, Cinema…). The values in this app are re-derived for what the A6000 can store and are not his recipes.
 
-License: MIT (this repository). OpenMemories-Platform: MIT, © 2017 ma1co.
+License: [GPL-3.0](LICENSE), © 2026 André Domingues. Releases up to and including v1.7.0 were published under MIT.
+OpenMemories-Platform: MIT, © 2017 ma1co.
+
+Additional term under GPL-3.0 section 7(b): any copy or modified version must preserve the attribution
+"Based on Recipe Lab by André Domingues" in its source notices and, where it has an interactive user interface, in
+the Appropriate Legal Notices it displays.
