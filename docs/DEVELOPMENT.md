@@ -40,6 +40,9 @@ src/com/voxivoid/recipelab/
                                writing the RECIPES folder — no Android, covered by test/
   RecipeFormats.java           the custom recipe file's versions: which RecipeFormat reads a file (its format line) and
                                which writes one (the newest); RecipeFormat.java is a version, RecipeFormatV1.java format 1
+  CardLog.java                 the shareable logs on the card, RECIPLAB/LOGS: LOG.TXT (opens, writes, failures, preview
+                               values the camera did not keep, the shutter, crashes) and DIFF.TXT (the snapshot tool),
+                               line format and roll-over — no Android, covered by test/
   Library.java                 one index over the table's recipes and the custom ones after it: the wheel, the panel's
                                count — no Android, covered by test/
   NameEntry.java               the name editor: placeholder, capitals, delete, walking the keyboard grid — no Android,
@@ -116,6 +119,7 @@ down or the wheel move, the centre button runs a row, a short MENU goes back a l
 | **Panel visibility** | a value — *Full* / *No keys* / *Label* / *Hidden* (`DevTools.PANELS`) — that left / right step through in place, wrapping, with the menu left open; centre steps forward. The same states trash cycles. *No keys* (`OV_QUIET`) is the full panel, chips and all (`Params.panelUp`), without the `HintBar` legend; closing the browser returns to it if it was left on it |
 | **Language** | a value — *Auto* / *English* / *简体中文* / *繁體中文* / *日本語* / *한국어* / *Tiếng Việt* — stepped the same way, kept in the app's preferences under `language` by code (`Lang.CODES`). The app redraws in it at once. *Auto* follows the camera's locale (`Lang.fromLocale`); each language's name is drawn in its own script and font. See [LOCALIZATION.md](LOCALIZATION.md) |
 | **Reset settings** | asks `DevTools.resetTitle()` (Cancel highlighted), then stages `Recipes.FACTORY` and stores it (`writeAll`, so the quality prompt still asks when it must). The same look as **Factory**, the first Sony recipe, which is in the list like the others (it was hidden once, and users went looking for it) |
+| **Save a bug report** | `saveReport()`: one file, `RECIPLAB/REPORT.TXT`, replaced on every save — the header, mode and `STATE` as of now, then the end of `LOG1.TXT` + `LOG.TXT` (48 KB), of `LOCKS.TXT`, `DIFF.TXT` and `KEYS.TXT` (8 KB each) and every camera parameter (`CardLog.report`). No card: a toast says so. The report forms ask for this file and nothing else, as most reporters are not developers |
 | **About** | the installed version (from `PackageManager` — never a string in the source, `tools/check-version.sh`), `model.name`, the firmware version (`ScalarProperties.getFirmwareVersion()`, `KeyProbe.firmware`), `version.platform`, the source URL, and the sponsor footer |
 | **Developer >** | the developer menu below |
 
@@ -130,7 +134,7 @@ The **developer menu** holds the tools that are not part of using the app:
 | **Read-only check — 26 slots** | the read-only check below: does this body flag any slot a recipe writes |
 | **Shoot samples — 77 recipes** | the sample run below |
 | **Settle delay** | a value — the delay the sample run waits after applying a recipe; left / right step through 0.8 / 1.2 / 2.0 / 3.0 / 5.0 s in place (centre steps forward), kept in the app's preferences |
-| **Key logger** | every key event on screen, newest first, and appended to `keys.txt` in `getFilesDir()`: scan code, down / up, repeat count, Sony's logic code; the header is the model, the platform and what the probe found. Nothing else happens while it runs; **hold MENU** leaves |
+| **Key logger** | every key event on screen, newest first, and appended to `RECIPLAB/LOGS/KEYS.TXT` on the card (`keys.txt` in `getFilesDir()` without one): scan code, down / up, repeat count, Sony's logic code; the header is the model, the platform and what the probe found. Nothing else happens while it runs; **hold MENU** leaves |
 
 New functions go in as app menu rows, not on new keys — see [Keys on every body](#keys-on-every-body).
 
@@ -142,11 +146,39 @@ id in `res/raw/ids.txt` (each settings entry of 16 bytes or less):
 1. **First press** writes `snapshot.bin` into `getFilesDir()` — the current value of every id.
 2. Leave the app, change **one** thing in the camera menus, reopen.
 3. **Second press** re-reads every id, diffs it against the snapshot, shows the changed ones as
-   `id:old>new` (first 14 on screen), appends the same line to `diff.txt` in `getFilesDir()`, and deletes
+   `id:old>new` (first 14 on screen), appends **every** change, timestamped, to `RECIPLAB/LOGS/DIFF.TXT` on the card
+   (`diff.txt` in `getFilesDir()` without a card), and deletes
    `snapshot.bin` — so the next press starts a fresh snapshot.
 
 Whatever shows up is the slot for the menu item you changed. Change one thing at a time or the diff is useless:
 the camera rewrites unrelated entries on its own, so a second change means guessing which id belongs to what.
+
+### Log on the card
+
+`CardLog`. Reports kept arriving without the one thing that would explain them — the developer tools wrote to `getFilesDir()`,
+which a user cannot reach without a shell. So the files that help debugging go where they can — `LOG.TXT`, and the
+tools' `DIFF.TXT`, `KEYS.TXT` and `LOCKS.TXT` — while `samples.txt` and `snapshot.bin` stay private: `RECIPLAB/LOGS/LOG.TXT` at the root of the card, which the camera shows over USB Mass Storage. The folder is
+`RECIPLAB`, not `RECIPE-LAB`: the card's FUSE layer takes 8.3 names only (see [Custom recipes](#custom-recipes)).
+
+| kind | when |
+|---|---|
+| `OPEN` | every `onResume`: model, platform, app version, the mode dial (`scene-mode` from the parameters `onResume` already read: `program-auto`, `shutter-speed`, …; an A6000 on the **Movie** dial reports `auto`, so the log writes `auto (Auto or Movie)`), the keys `KeyProbe` found |
+| `STATE` | at an opening, what the store holds for every recipe row (`STYLE=1 SAT=0 …`) — only when it changed since it was last logged (prefs `loggedState`), so the camera's own menus show up between two openings |
+| `INFO` | the mode dial turned with the app open (read back with the preview parameters), the snapshot tool's diff in `DIFF.TXT` |
+| `WRITE` | a successful store: the recipe and every `id=value` written |
+| `FAIL` | a refused write (slot, value, the error, how many went in first), read-only slots, a failed store read, a custom recipe save / delete, the shutter throwing |
+| `PREVIEW` | autofocus refused, the camera not opening, the preview not starting, `setParameters` throwing — and the preview values the camera did not keep, read back after each `setParameters` (`color-mode mono>standard`), since a dropped value throws nothing (#104). Logged once per change, not per key press |
+| `SHOOT` | before every `takePicture`, the shutter key's and the sample run's: on a body that reboots on the shutter (#100) the last line is the frame that did it |
+| `CRASH` | the default uncaught-exception handler: the stack, then the platform's own handler |
+
+Times are the camera's clock, read from Sony's `TimeUtil` (the Android clock is never set: an A6000 log read 1970). Each line is opened, written and closed on its own, so a reboot loses at most the line being written. Past
+`CardLog.MAX_BYTES` (64 KB) any of them becomes its older file (`LOG1.TXT`, `KEYS1.TXT`, …), replacing the one before.
+
+`PARAMS.TXT` is every camera parameter (`flatten()`, about 9 KB on an A6000), one sorted line each, so two reports
+diff cleanly. It is **replaced**, not appended, and only when the parameters changed (prefs `paramsHash`): a full
+picture of the camera as of the last opening that differed, with nothing read beyond what `onResume` already reads. The
+folder never holds more than nine fixed names, about 600 KB. No card, nothing is written, and a
+log that cannot be written never stops the app. English always. The report forms do not ask for these files one by one: **Save a bug report** in the app menu bundles them into `RECIPLAB/REPORT.TXT`, the one file a user attaches.
 
 ### Read-only check
 
@@ -162,7 +194,7 @@ about that slot, and no answer at all about Creative Style, saturation or white 
 
 So the app asks per slot instead. The row reads `NativeBackup.attr(id)` for every entry of `Params.allSlots()` —
 the 26 slots any recipe can write — and reports `26 recipe slots checked · none read-only`, or names the rows
-that are flagged. The full list goes to `locks.txt` in `getFilesDir()`, one line per slot
+that are flagged. The full list goes to `RECIPLAB/LOGS/LOCKS.TXT` on the card (`locks.txt` in `getFilesDir()` without one), one line per slot
 (`01070175 STYLE attr=0`), which is what a compatibility report should quote. A slot the camera will not answer
 for counts as writable: the write path reports a refusal properly, so a failed probe must not block a recipe.
 
@@ -522,6 +554,7 @@ against a SHA-256 pinned in the script (`JUNIT_JAR=<path>` points it at a copy w
 | `KeyProbeCameraTest` | the key probe against test doubles of Sony's `ScalarInput`, `KeyStatus` and `ScalarProperties` (`test/com/sony/scalar/sysutil/`, shaped like the OpenMemories-Framework stubs): the reflection finds the real signatures, only `valid == 1` is a key, only `status == 1` is a press. The doubles throw for anything a test did not set up, which is how the "off the camera" answers stay null |
 | `FavouritesTest` | the favourites list — stored by name, unknown names dropped, marking order kept, toggle, the highlight after a removal, custom recipes as `custom:<name>` kept while their card is out — and the browser's group order: Favourites, Custom with its New row, the brands |
 | `RecipeFormatsTest` | the file's versions: numbered 1, 2, 3 … with the newest written, every writer read back by its own reader, each file read by the version it names (a stand-in version 2 beside format 1), unknown versions skipped whole, the shared envelope |
+| `CardLogTest` | the log's 8.3 names and folder, appending and creating the folders, the roll-over (one old file, never the diff), the line format, the refused-write, written-slots and dropped-preview lines |
 | `CustomRecipesTest` | the recipe file: every built-in look survives a round trip, hand-edited files (BOM, CRLF, case, comments, unknown keys) still read, a newer format or any out-of-range value skips the file with the reason, names and default names, file names, and save / edit / rename / delete / load against a temporary folder |
 | `LibraryTest` | one index over the table and the custom recipes: the wheel walks into them and wraps, the panel counts them among themselves |
 | `NameEntryTest` | the name editor: the placeholder the first character replaces, capitals, delete, the length limit, walking the grid with the four-way and the wheel |
