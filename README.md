@@ -8,26 +8,27 @@
   Film simulations and camera looks for the <b>Sony</b> cameras that support <b>PlayMemories Camera Apps</b>, stored in the camera itself.<br>
   <sub>
     <img src="https://img.shields.io/github/v/release/voxivoid/recipe-lab-sony-pmca?label=version" alt="version"> ·
+    <a href="https://recipelab.io">Website</a> ·
     <a href="https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest/download/RecipeLab.apk">Download the app</a> ·
-    <a href="docs/SAMPLES.md">See every recipe</a>
+    <a href="https://recipelab.io/recipes">See every recipe</a>
   </sub>
 </p>
 
-<h3 align="center">Do you love this project? Sponsor it!</h3>
+<h3 align="center">Do you love this project? Leave a tip!</h3>
 
 <p align="center">
-  <a href="https://github.com/sponsors/voxivoid"><img
-    src="https://img.shields.io/badge/Sponsor_on_GitHub-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white&style=for-the-badge"
-    alt="Sponsor on GitHub"></a>
   <a href="https://ko-fi.com/voxivoid"><img
     src="https://img.shields.io/badge/Tip_on_Ko--fi-%E2%98%95-ff5e5b?logo=kofi&logoColor=white&style=for-the-badge"
     alt="Tip on Ko-fi"></a>
+  <a href="https://github.com/sponsors/voxivoid"><img
+    src="https://img.shields.io/badge/Sponsor_on_GitHub-%E2%9D%A4-db61a2?logo=githubsponsors&logoColor=white&style=for-the-badge"
+    alt="Sponsor on GitHub"></a>
 </p>
 
 <p align="center">
   <sub>
-    The app is free and stays free. Sponsoring pays for keeping it maintained, for building new features, and for
-    buying the cameras it has to be tested on — I currently only own a Sony a6000.
+    Recipe Lab is built and maintained by one person. Tips pay for keeping it maintained, for building new features,
+    and for buying the cameras it has to be tested on — I currently only own a Sony a6000.
   </sub>
 </p>
 
@@ -87,8 +88,8 @@ mode**, photo and video, with the app closed. Turn it off and on, it is still th
 | **Other stocks** | Agfa Vista 200, Agfa Ultra 100, Polaroid / Instax |
 | **Ilford** | HP5, FP4, Delta 100, Delta 3200, Pan F 50 |
 
-**[See every recipe on the same subject →](docs/SAMPLES.md)** — 78 frames, one scene, one exposure, straight out of
-the camera.
+**[See every recipe on the same subject →](https://recipelab.io/recipes)** — 77 frames, one scene, one
+exposure, straight out of the camera.
 
 Recipes marked **JPEG only** in the app (Acros +R, Tri-X 1600, GR Retro, GR Hi-Contrast B&W, Sony SH, Polaroid) are
 built on a Picture Effect because, against the reference frames, its tone
@@ -112,7 +113,7 @@ Failures are as useful as successes.
 
 ### Cameras that run PlayMemories apps
 
-✅ someone has run it on that body · ❔ app-capable, nobody has reported back yet
+✅ someone has run it on that body · ❔ app-capable, nobody has reported back yet · ❌ reported not to take the app
 
 | camera | model code | status | comment |
 |---|---|---|---|
@@ -121,10 +122,10 @@ Failures are as useful as successes.
 | **A5100** | ILCE-5100 | ✅ | no **Fn** button: the brand list is under **hold MENU → Browse recipes** |
 | **A7 II** | ILCE-7M2 | ✅ |  |
 | **A7** | ILCE-7 | ✅ |  |
-| **NEX-5T** | NEX-5T | ✅ | the stored values did not all match, and some menu labels read differently ([#22](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/22)) |
+| **NEX-5T** | NEX-5T | ✅ | some menu labels read differently ([#22](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/22)) |
 | **A6300** | ILCE-6300 | ✅ |  |
 | **A7R** | ILCE-7R | ✅ |  |
-| **A7R II** | ILCE-7RM2 | ✅ |  |
+| **A7R II** | ILCE-7RM2 | ✅ | one of four reports lost the look after a power cycle — check the mode dial is not on **MR** / **1** / **2** ([#82](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/82)) |
 | **RX100 V** | DSC-RX100M5 | ✅ |  |
 | **HX60 / HX60V** | DSC-HX60 | ✅ | zoom and flash could not be used ([#42](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/42)) |
 | **A7S II** | ILCE-7SM2 | ✅ | the image stabiliser misbehaved with a manual lens while the app was open ([#48](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/48)) |
@@ -132,17 +133,17 @@ Failures are as useful as successes.
 | **RX1R II** | DSC-RX1RM2 | ✅ |  |
 | **A5000** | ILCE-5000 | ✅ | no **Fn** button: the brand list is under **hold MENU → Browse recipes**; one sample run froze the camera after about eight frames, and only pulling the battery brought it back ([#58](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/58)) |
 | **HX90 / HX90V** | DSC-HX90 | ✅ |  |
-| A7S | ILCE-7S | ❔ |  |
-| NEX-5R | NEX-5R | ❔ |  |
-| NEX-6 | NEX-6 | ❔ | menus differ a lot from the A6000 generation, so the settings are the least likely to sit in the same place |
+| **NEX-5R** | NEX-5R | ✅ |  |
+| **A7S** | ILCE-7S | ✅ |  |
+| **NEX-6** | NEX-6 | ✅ |  |
 | A68 | ILCA-68 | ❔ | not in the installer's device table, so even the install is untested |
-| A77 II | ILCA-77M2 | ❔ |  |
+| A77 II | ILCA-77M2 | ❌ | one owner (firmware 2.00) found no `MENU → Application`, and the installer refused the camera with `This device does not support apps` ([#114](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/114)) |
 | A99 II | ILCA-99M2 | ❔ |  |
-| RX100 IV | DSC-RX100M4 | ❔ |  |
+| **RX100 IV** | DSC-RX100M4 | ✅ |  |
 | RX10 II | DSC-RX10M2 | ❔ |  |
 | RX10 III | DSC-RX10M3 | ❔ |  |
 | HX400 / HX400V | DSC-HX400 | ❔ | compact; no control wheel of the kind the app is driven with |
-| WX500 | DSC-WX500 | ❔ | compact; no control wheel of the kind the app is driven with |
+| **WX500** | DSC-WX500 | ✅ | the rear wheel scrolls the recipes; playback or power off closes the app |
 
 Two more are unclear: the **RX100 II** and the original **RX10** had Sony's app store, but are missing from the
 installer's device table, so even the install is untested.
@@ -159,11 +160,12 @@ which closed in 2021.
 | | |
 |---|---|
 | **E-mount, APS-C** | A6100, A6400, A6600, A6700, ZV-E10, ZV-E10 II, FX30 |
-| **E-mount, full frame** | A7 III, A7R III, A7R IV / IVA, A7R V, A7S III, A7C, A7C II, A7CR, A9, A9 II, A9 III, A1, A1 II, ZV-E1, FX3 |
+| **E-mount, full frame** | A7 III, A7 IV, A7R III, A7R IV / IVA, A7R V, A7S III, A7C, A7C II, A7CR, A9, A9 II, A9 III, A1, A1 II, ZV-E1, FX3 |
 | **Cyber-shot** | RX100 VA, RX100 VI, RX100 VII, RX10 IV, RX0, RX0 II, HX99, ZV-1, ZV-1F, ZV-1 II |
 
-…and everything released since. The menu is the test: no `MENU → Application` on your camera, no app — so reports of
-Recipe Lab running on an A6400 or similar are mistaken.
+…and everything released since, as well as bodies from before Sony's app store, such as the HX50 / HX50V
+([#115](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/115)). The menu is the test: no `MENU → Application`
+on your camera, no app — so reports of Recipe Lab running on an A6400 or similar are mistaken.
 
 ## Installing
 
@@ -269,9 +271,9 @@ Open **Recipe Lab** from the Application List. The live view shows the look. The
 
 **Menu** — **hold MENU**
 
-- **Browse recipes** · **New recipe** · **Panel visibility** · **Language** · **Reset settings** · **About** · **Developer**.
+- **Browse recipes** · **New recipe** · **Panel visibility** · **Language** · **Reset settings** · **Save a bug report** · **About** · **Developer**.
 - **New recipe** saves the camera's current settings as a [custom recipe](#custom-recipes).
-- Languages: *Auto*, English, 简体中文, 繁體中文.
+- Languages: *Auto*, English, 简体中文, 繁體中文, 日本語, 한국어, Tiếng Việt.
 
 ## Custom recipes
 
@@ -367,11 +369,13 @@ The common questions — RAW files, damage, LUTs, newer bodies — are in the **
 |---|---|
 | `No devices found` | USB Connection must be *Mass Storage*; card inserted; camera on and showing *USB Mode*; try another cable or port |
 | Stuck at `Waiting for camera to switch...` | Unplug, turn the camera off and on, reconnect, run again |
+| `UnicodeDecodeError: 'utf-8' codec can't decode byte ...` after `Waiting for camera to switch...`, with `getfqdn` in the traceback | The installer cannot read your computer's name when it has accents or other non-English letters in it. Rename the computer to plain letters and digits (Windows: *Settings → System → About → Rename this PC*), restart, and install again ([#103](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/103)) |
 | `Not written — the camera holds these settings read-only` or `WRITE FAILED` | The camera refused the recipe. Install [OpenMemories-Tweak](https://github.com/ma1co/OpenMemories-Tweak), open **Protection**, tick *Unlock protected settings* until it reads *Protection disabled*, then pick the recipe again |
 | Look not applied after picking a recipe | Turn the camera off and on |
 | Look gone after a power cycle, or the recipe will not store, with the mode dial on **MR** / **1** / **2** | Memory Recall loads the settings registered to that position at power-on, over whatever the app stored. Turn the dial to P, A, S or M, store the recipe again, and register it to the MR slot from the camera's menu if you want it there ([#59](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/59)) |
 | Look right in the app, gone once you leave it | If your camera has a **Picture Profile** menu (the A6000 does not), set `MENU → Picture Profile` to *Off* and pick the recipe again. While a Picture Profile runs, the camera ignores Creative Style and its sliders. Older recipes that used the colour matrix could switch PP3 on themselves on these bodies ([#38](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/38)); picking any recipe now switches it off |
 | `no live preview: ...` in the panel | Something else is holding the camera; close and reopen the app |
+| Anything else, or to report a bug | In the app, **hold MENU → Save a bug report**. Connect the camera to a computer (or put the card in a reader) and attach `RECIPLAB/REPORT.TXT` to a [bug report](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/new?template=bug_report.yml) or [compatibility report](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/new?template=compatibility_report.yml). That one file holds everything we need. Step by step: [FAQ](docs/FAQ.md#something-went-wrong) |
 | Text shows `Â·` | Old build; install the APK from the [latest release](https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest) |
 
 ## For developers
@@ -406,4 +410,9 @@ on that.
 reference frames on his site were the inspiration and the benchmark for many of the looks here (Kodak, Fuji, Cinestill,
 Ilford, Cinema…). The values in this app are re-derived for what the A6000 can store and are not his recipes.
 
-License: MIT (this repository). OpenMemories-Platform: MIT, © 2017 ma1co.
+License: [GPL-3.0](LICENSE), © 2026 André Domingues. Releases up to and including v1.7.0 were published under MIT.
+OpenMemories-Platform: MIT, © 2017 ma1co.
+
+Additional term under GPL-3.0 section 7(b): any copy or modified version must preserve the attribution
+"Based on Recipe Lab by André Domingues" in its source notices and, where it has an interactive user interface, in
+the Appropriate Legal Notices it displays.

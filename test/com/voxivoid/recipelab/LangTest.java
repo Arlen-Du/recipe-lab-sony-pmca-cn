@@ -25,8 +25,16 @@ import org.junit.jupiter.api.Test;
  * has a glyph for every character its table uses.
  */
 class LangTest {
-    private static final int[] TRANSLATIONS = { Lang.ZH_HANS, Lang.ZH_HANT };
-    private static final String[] FONTS = { null, "assets/fonts/RecipeLabCJKsc-Regular.ttf", "assets/fonts/RecipeLabCJKtc-Regular.ttf" };
+    private static final int[] TRANSLATIONS = { Lang.ZH_HANS, Lang.ZH_HANT, Lang.JA, Lang.KO, Lang.VI };
+    /** the bundled font of each translation; null where the camera's own font draws it */
+    private static final String[] FONTS = {
+        null,
+        "assets/fonts/RecipeLabCJKsc-Regular.ttf",
+        "assets/fonts/RecipeLabCJKtc-Regular.ttf",
+        "assets/fonts/RecipeLabCJKjp-Regular.ttf",
+        "assets/fonts/RecipeLabCJKkr-Regular.ttf",
+        null,
+    };
     private static final Pattern PLACEHOLDER = Pattern.compile("%(?:\\d+\\$)?[a-zA-Z]");
 
     @AfterEach void english() { Lang.use(Lang.EN); }
@@ -41,6 +49,7 @@ class LangTest {
         for (int pe = 0; pe < Recipes.PE_KEYS.length; pe++) { String[] v = Recipes.subValues(pe); if (v != null) for (String s : v) k.add("sub_" + Lang.slug(s)); }
         for (String q : Params.Q_LABEL) k.add("quality_" + Lang.slug(q));
         for (String g : Recipes.GROUPS) k.add("group_" + Lang.slug(g));
+        for (Recipes.Recipe r : Recipes.ALL) k.add("recipe_" + Lang.slug(r.name));
         return k;
     }
 
@@ -120,7 +129,10 @@ class LangTest {
     @Test void textFollowsTheCurrentLanguageAndFallsBackToEnglish() {
         assertEquals("Picked — 3 values written", Lang.t("status_picked_many", 3));
         Lang.use(Lang.ZH_HANS);
-        assertEquals("已写入 3 项设置，重启相机生效", Lang.t("status_picked_many", 3));
+        assertEquals("已选用——写入 3 项", Lang.t("status_picked_many", 3));
+        Lang.use(Lang.KO);
+        assertEquals("선택됨 — 값 3개 기록", Lang.t("status_picked_many", 3));
+        Lang.use(Lang.EN);
         assertEquals("no_such_key", Lang.t("no_such_key"), "a missing key shows itself rather than crashing the camera app");
     }
 
@@ -129,22 +141,22 @@ class LangTest {
         assertEquals("Classic Chrome", Recipes.displayName(r));
         assertNull(Recipes.originalName(r), "nothing to show under a name that is already the canonical one");
         Lang.use(Lang.ZH_HANS);
-        assertEquals("Classic Chrome", Recipes.displayName(r));
-        assertNull(Recipes.originalName(r), "recipes stay in canonical English without a subtitle");
+        assertEquals("经典正片", Recipes.displayName(r));
+        assertEquals("Classic Chrome", Recipes.originalName(r));
         assertEquals("Classic Chrome", r.name, "the identifier favourites and the manifest use never changes");
         assertEquals("柯达", Recipes.groupLabel(3));
-        assertEquals("饱和", Params.rowName(Params.R_SAT));
+        assertEquals("饱和度", Params.rowName(Params.R_SAT));
         assertEquals("自动", Recipes.droLabel(Recipes.DRO_AUTO));
         Lang.use(Lang.ZH_HANT);
-        assertEquals("Classic Chrome", Recipes.displayName(r));
+        assertEquals("經典正片", Recipes.displayName(r));
     }
 
     @Test void theHudAndTheLegendFollowTheLanguage() {
         int[] cur = Fixtures.factoryRows();
         Lang.use(Lang.ZH_HANS);
         int[] raw = cur.clone(); raw[Params.R_PE] = Recipes.PE_RETRO; raw[Params.R_QUAL] = Params.Q_RAW;
-        assertEquals("RAW开启: 忽略效果", Params.metaLine(raw, null));
-        assertEquals("写入", Keys.hints(Keys.H_RECIPE, Keys.Caps.UNKNOWN).labels[0]);
+        assertEquals("RAW 已开启：照片效果不会生效", Params.metaLine(raw, null));
+        assertEquals("选用", Keys.hints(Keys.H_RECIPE, Keys.Caps.UNKNOWN).labels[0]);
         assertEquals("收藏", Favourites.groupName(Favourites.GROUP));
         Lang.use(Lang.ZH_HANT);
         assertEquals("RAW 已開啟：相片效果不會生效", Params.metaLine(raw, null));
@@ -165,8 +177,11 @@ class LangTest {
         assertEquals(Lang.EN, Lang.nextChoice(Lang.AUTO, +1));
         assertEquals(Lang.ZH_HANS, Lang.nextChoice(Lang.EN, +1));
         assertEquals(Lang.ZH_HANT, Lang.nextChoice(Lang.ZH_HANS, +1));
-        assertEquals(Lang.AUTO, Lang.nextChoice(Lang.ZH_HANT, +1));
-        assertEquals(Lang.ZH_HANT, Lang.nextChoice(Lang.AUTO, -1));
+        assertEquals(Lang.JA, Lang.nextChoice(Lang.ZH_HANT, +1));
+        assertEquals(Lang.KO, Lang.nextChoice(Lang.JA, +1));
+        assertEquals(Lang.VI, Lang.nextChoice(Lang.KO, +1));
+        assertEquals(Lang.AUTO, Lang.nextChoice(Lang.VI, +1));
+        assertEquals(Lang.VI, Lang.nextChoice(Lang.AUTO, -1));
     }
 
     @Test void aChoiceIsStoredByCodeAndAnythingUnknownIsAuto() {
@@ -182,7 +197,10 @@ class LangTest {
         assertEquals(Lang.ZH_HANT, Lang.resolve(Lang.AUTO, "zh", "TW"));
         assertEquals(Lang.ZH_HANT, Lang.resolve(Lang.AUTO, "zh", "HK"));
         assertEquals(Lang.ZH_HANT, Lang.resolve(Lang.AUTO, "zh", "MO"));
-        assertEquals(Lang.EN, Lang.resolve(Lang.AUTO, "ja", "JP"), "no table for it, so English");
+        assertEquals(Lang.JA, Lang.resolve(Lang.AUTO, "ja", "JP"));
+        assertEquals(Lang.KO, Lang.resolve(Lang.AUTO, "ko", "KR"));
+        assertEquals(Lang.VI, Lang.resolve(Lang.AUTO, "vi", "VN"));
+        assertEquals(Lang.EN, Lang.resolve(Lang.AUTO, "fr", "FR"), "no table for it, so English");
         assertEquals(Lang.EN, Lang.resolve(Lang.AUTO, null, null), "a camera that will not say");
         assertEquals(Lang.ZH_HANT, Lang.resolve(Lang.ZH_HANT, "en", "US"), "a choice overrides the camera");
         assertEquals(Lang.EN, Lang.resolve(Lang.EN, "zh", "CN"));
@@ -195,6 +213,9 @@ class LangTest {
         assertEquals("简体中文", Lang.choiceLabel(Lang.ZH_HANS));
         assertEquals(Lang.ZH_HANS, Lang.choiceScript(Lang.ZH_HANS), "drawn in the font of the language it names");
         assertEquals("English", Lang.choiceLabel(Lang.EN));
+        assertEquals("日本語", Lang.choiceLabel(Lang.JA));
+        assertEquals("한국어", Lang.choiceLabel(Lang.KO));
+        assertEquals("Tiếng Việt", Lang.choiceLabel(Lang.VI));
     }
 
     // ---- files stay English
@@ -227,6 +248,7 @@ class LangTest {
     // ---- fonts
     @Test void eachFontHasAGlyphForEveryCharacterItsTableUses() throws Exception {
         for (int lang : TRANSLATIONS) {
+            if (FONTS[lang] == null) continue;
             File f = new File(FONTS[lang]);
             assumeTrue(f.isFile(), "run from the repository root to check " + f);
             byte[] ttf = Files.readAllBytes(f.toPath());
@@ -246,6 +268,7 @@ class LangTest {
         // a TextView sizes each line by the font's ascent / descent and pads it to the bounding box: a font that reports
         // more than the camera's Droid Sans (2048 units: hhea 1900 / -500, bbox -555 .. 2163) makes every line taller
         for (int lang : TRANSLATIONS) {
+            if (FONTS[lang] == null) continue;
             File f = new File(FONTS[lang]);
             assumeTrue(f.isFile(), "run from the repository root to check " + f);
             byte[] ttf = Files.readAllBytes(f.toPath());
@@ -257,6 +280,18 @@ class LangTest {
             assertTrue(line <= 2400 / 2048.0 + 0.001, f + " line height " + line + " em -- run tools/subset-font.py");
             assertTrue(box <= 2718 / 2048.0, f + " bounding box " + box + " em -- run tools/subset-font.py");
         }
+    }
+
+    @Test void vietnameseStaysInTheLatinRangesTheCamerasFontDraws() {
+        // the camera's font has Latin, Latin Extended and the Vietnamese letters (U+1EA0..U+1EF9), and nothing from CJK or
+        // Hangul; a Vietnamese string outside those ranges would be drawn as boxes
+        for (String[] kv : Lang.table(Lang.VI))
+            for (int i = 0; i < kv[1].length(); ) {
+                int c = kv[1].codePointAt(i);
+                i += Character.charCount(c);
+                boolean latin = c < 0x250 || (c >= 0x1EA0 && c <= 0x1EF9) || (c >= 0x2000 && c <= 0x206F) || (c >= 0x2190 && c <= 0x21FF) || (c >= 0x20 && c < 0x7f);
+                assertTrue(latin || c == 0x2014 || c == 0xB7 || c == 0x2192 || c == 0x2013, kv[0] + " uses U+" + Integer.toHexString(c));
+            }
     }
 
     /** where a TrueType table starts */

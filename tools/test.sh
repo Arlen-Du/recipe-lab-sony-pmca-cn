@@ -29,6 +29,7 @@ UNITS=(
   src/com/voxivoid/recipelab/Params.java
   src/com/voxivoid/recipelab/Favourites.java
   src/com/voxivoid/recipelab/CustomRecipes.java
+  src/com/voxivoid/recipelab/CardLog.java
   src/com/voxivoid/recipelab/RecipeFormat.java
   src/com/voxivoid/recipelab/RecipeFormats.java
   src/com/voxivoid/recipelab/RecipeFormatV1.java
@@ -41,6 +42,9 @@ UNITS=(
   src/com/voxivoid/recipelab/TextEn.java
   src/com/voxivoid/recipelab/TextZhHans.java
   src/com/voxivoid/recipelab/TextZhHant.java
+  src/com/voxivoid/recipelab/TextJa.java
+  src/com/voxivoid/recipelab/TextKo.java
+  src/com/voxivoid/recipelab/TextVi.java
 )
 
 mkdir -p out/test

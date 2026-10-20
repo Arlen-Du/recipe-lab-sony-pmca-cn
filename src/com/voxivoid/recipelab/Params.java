@@ -221,6 +221,9 @@ final class Params {
         return s.toString();
     }
 
+    /** whether a slot is a companion or mirror copy that older bodies (NEX-5R/5T, NEX-6) may not have */
+    static boolean companionSlot(int id) { return id == ID_EV2 || id == ID_QFMT2 || id == ID_QJPG2; }
+
     /**
      * The slots of a pending write the camera holds read-only, given one attribute word per write ({@code -1}
      * where the camera would not answer). A slot whose attribute cannot be read counts as writable: the write
@@ -230,6 +233,16 @@ final class Params {
         List<Integer> locked = new ArrayList<Integer>();
         for (int i = 0; i < ws.size(); i++) if (attrs[i] >= 0 && slotLocked(attrs[i])) locked.add(ws.get(i).id);
         return locked;
+    }
+
+    /**
+     * The writes of {@code ws} that exist on this body: drops companion/mirror copies the camera would not answer
+     * for ({@code attrs[i] < 0}, issue #84), while keeping every primary slot so a real refusal still surfaces.
+     */
+    static List<Write> supportedFrom(List<Write> ws, int[] attrs) {
+        List<Write> out = new ArrayList<Write>(ws.size());
+        for (int i = 0; i < ws.size(); i++) if (attrs[i] >= 0 || !companionSlot(ws.get(i).id)) out.add(ws.get(i));
+        return out;
     }
 
     /**
@@ -354,8 +367,8 @@ final class Params {
         p.put("color-compensation-for-white-balance", String.valueOf(-edit[R_GM]));   // camera counts magenta positive; recipes count green positive
         p.put("storage-fmt", Q_FMT[edit[R_QUAL]]); p.put("jpeg-quality", Q_JPG[edit[R_QUAL]]);
         p.put("picture-effect", Recipes.PE_KEYS[edit[R_PE]]);
-        String sk = Recipes.subKey(edit[R_PE]); String[] sv = Recipes.subValues(edit[R_PE]);
-        if (sk != null && sv != null && edit[R_SUB] >= 0 && edit[R_SUB] < sv.length) p.put(sk, sv[edit[R_SUB]]);
+        String sk = Recipes.subKey(edit[R_PE]), sv = Recipes.subRuntime(edit[R_PE], edit[R_SUB]);
+        if (sk != null && sv != null) p.put(sk, sv);
         p.put("exposure-compensation", String.valueOf(edit[R_EV]));
         int dro = edit[R_DRO];
         if (dro == Recipes.DRO_AUTO) p.put("dro-mode", "auto");
