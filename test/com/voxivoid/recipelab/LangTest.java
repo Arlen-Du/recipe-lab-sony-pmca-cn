@@ -49,6 +49,11 @@ class LangTest {
         for (int pe = 0; pe < Recipes.PE_KEYS.length; pe++) { String[] v = Recipes.subValues(pe); if (v != null) for (String s : v) k.add("sub_" + Lang.slug(s)); }
         for (String q : Params.Q_LABEL) k.add("quality_" + Lang.slug(q));
         for (String g : Recipes.GROUPS) k.add("group_" + Lang.slug(g));
+        return k;
+    }
+
+    static Set<String> recipeKeys() {
+        Set<String> k = new LinkedHashSet<String>();
         for (Recipes.Recipe r : Recipes.ALL) k.add("recipe_" + Lang.slug(r.name));
         return k;
     }
@@ -75,17 +80,24 @@ class LangTest {
     }
 
     @Test void everyTranslationHasEveryKeyAndNoOther() {
-        Set<String> want = new TreeSet<String>(keys(Lang.EN));
-        want.addAll(canonicalKeys());
-        for (int lang : TRANSLATIONS) assertEquals(want, new TreeSet<String>(keys(lang)), code(lang));
+        Set<String> base = new TreeSet<String>(keys(Lang.EN));
+        base.addAll(canonicalKeys());
+        for (int lang : TRANSLATIONS) {
+            Set<String> want = new TreeSet<String>(base);
+            if (lang != Lang.ZH_HANS && lang != Lang.ZH_HANT) want.addAll(recipeKeys());
+            assertEquals(want, new TreeSet<String>(keys(lang)), code(lang));
+        }
     }
 
     @Test void everyTranslationKeepsEnglishsPlaceholders() {
         for (int lang : TRANSLATIONS)
             for (String[] kv : Lang.table(Lang.EN))
                 assertEquals(placeholders(kv[1]), placeholders(text(lang, kv[0])), code(lang) + " " + kv[0]);
-        for (int lang : TRANSLATIONS)
+        for (int lang : TRANSLATIONS) {
             for (String k : canonicalKeys()) assertEquals(new ArrayList<String>(), placeholders(text(lang, k)), code(lang) + " " + k);
+            if (lang != Lang.ZH_HANS && lang != Lang.ZH_HANT)
+                for (String k : recipeKeys()) assertEquals(new ArrayList<String>(), placeholders(text(lang, k)), code(lang) + " " + k);
+        }
     }
 
     private static List<String> placeholders(String s) {
@@ -129,7 +141,7 @@ class LangTest {
     @Test void textFollowsTheCurrentLanguageAndFallsBackToEnglish() {
         assertEquals("Picked — 3 values written", Lang.t("status_picked_many", 3));
         Lang.use(Lang.ZH_HANS);
-        assertEquals("已选用——写入 3 项", Lang.t("status_picked_many", 3));
+        assertEquals("已写入 3 项设置，重启相机生效", Lang.t("status_picked_many", 3));
         Lang.use(Lang.KO);
         assertEquals("선택됨 — 값 3개 기록", Lang.t("status_picked_many", 3));
         Lang.use(Lang.EN);
@@ -141,22 +153,26 @@ class LangTest {
         assertEquals("Classic Chrome", Recipes.displayName(r));
         assertNull(Recipes.originalName(r), "nothing to show under a name that is already the canonical one");
         Lang.use(Lang.ZH_HANS);
-        assertEquals("经典正片", Recipes.displayName(r));
-        assertEquals("Classic Chrome", Recipes.originalName(r));
+        assertEquals("Classic Chrome", Recipes.displayName(r));
+        assertNull(Recipes.originalName(r), "recipes stay in canonical English without a subtitle");
         assertEquals("Classic Chrome", r.name, "the identifier favourites and the manifest use never changes");
         assertEquals("柯达", Recipes.groupLabel(3));
-        assertEquals("饱和度", Params.rowName(Params.R_SAT));
+        assertEquals("饱和", Params.rowName(Params.R_SAT));
         assertEquals("自动", Recipes.droLabel(Recipes.DRO_AUTO));
         Lang.use(Lang.ZH_HANT);
-        assertEquals("經典正片", Recipes.displayName(r));
+        assertEquals("Classic Chrome", Recipes.displayName(r));
+        assertNull(Recipes.originalName(r));
+        Lang.use(Lang.JA);
+        assertEquals("クラシッククローム", Recipes.displayName(r));
+        assertEquals("Classic Chrome", Recipes.originalName(r));
     }
 
     @Test void theHudAndTheLegendFollowTheLanguage() {
         int[] cur = Fixtures.factoryRows();
         Lang.use(Lang.ZH_HANS);
         int[] raw = cur.clone(); raw[Params.R_PE] = Recipes.PE_RETRO; raw[Params.R_QUAL] = Params.Q_RAW;
-        assertEquals("RAW 已开启：照片效果不会生效", Params.metaLine(raw, null));
-        assertEquals("选用", Keys.hints(Keys.H_RECIPE, Keys.Caps.UNKNOWN).labels[0]);
+        assertEquals("RAW开启: 忽略效果", Params.metaLine(raw, null));
+        assertEquals("写入", Keys.hints(Keys.H_RECIPE, Keys.Caps.UNKNOWN).labels[0]);
         assertEquals("收藏", Favourites.groupName(Favourites.GROUP));
         Lang.use(Lang.ZH_HANT);
         assertEquals("RAW 已開啟：相片效果不會生效", Params.metaLine(raw, null));

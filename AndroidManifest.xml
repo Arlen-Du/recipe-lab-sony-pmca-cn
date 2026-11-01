@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.voxivoid.recipelab"
-    android:versionCode="10901999"
-    android:versionName="1.9.1">
+    android:versionCode="11101999"
+    android:versionName="1.11.1">
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="10" />
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- custom recipes: one file each in RECIPES on the memory card -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Transfer to phone: the camera's hotspot (Wi-Fi Direct) and an HTTP server for Recipe Lab Studio -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
         <activity android:name=".MainActivity" android:label="@string/app_name"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" android:screenOrientation="landscape">

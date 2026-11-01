@@ -10,7 +10,8 @@
     <img src="https://img.shields.io/github/v/release/voxivoid/recipe-lab-sony-pmca?label=version" alt="version"> ·
     <a href="https://recipelab.io">Website</a> ·
     <a href="https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest/download/RecipeLab.apk">Download the app</a> ·
-    <a href="https://recipelab.io/recipes">See every recipe</a>
+    <a href="https://recipelab.io/recipes">See every recipe</a> ·
+    <a href="https://recipelab.io/studio">Recipe Lab Studio</a>
   </sub>
 </p>
 
@@ -48,6 +49,7 @@
   - [The edit buttons](#the-edit-buttons)
   - [Rename, delete, favourite](#rename-delete-favourite)
   - [Sharing](#sharing)
+- [Transfer to phone](#transfer-to-phone)
 - [What it changes](#what-it-changes)
 - [Uninstalling](#uninstalling)
 - [Troubleshooting](#troubleshooting)
@@ -63,6 +65,11 @@ as the A6000, A6300, A6500 and A7 II (see [Compatibility](#compatibility)). It c
 recreate the looks of other cameras — Fuji film simulations, Ricoh GR image controls, Leica, Hasselblad, Canon and
 Nikon colour, Sony's newer Creative Looks — and of classic film stocks from Kodak, Fuji, Cinestill, Agfa and Ilford.
 You can also make your own, and share them.
+
+**Recipe Lab has a phone app too.** [**Recipe Lab Studio**](https://recipelab.io/studio) develops your RAWs on iPhone,
+iPad and Android with these same looks, plus the film grain and mist a camera cannot do. The camera sends it photos
+and recipes over Wi-Fi ([Transfer to phone](#transfer-to-phone)), so a look you made on the camera is on the phone,
+and a look you made on the phone is on the camera. The camera app stays what it is: the looks, stored in the camera.
 
 You turn the wheel, watch the live image change, press a button. From then on the camera shoots that way in **every
 mode**, photo and video, with the app closed. Turn it off and on, it is still there.
@@ -88,7 +95,7 @@ mode**, photo and video, with the app closed. Turn it off and on, it is still th
 | **Other stocks** | Agfa Vista 200, Agfa Ultra 100, Polaroid / Instax |
 | **Ilford** | HP5, FP4, Delta 100, Delta 3200, Pan F 50 |
 
-**[See every recipe on the same subject →](https://recipelab.io/recipes)** — 77 frames, one scene, one
+**[See every recipe on the same subject →](https://recipelab.io/recipes)** — 78 frames, one scene, one
 exposure, straight out of the camera.
 
 Recipes marked **JPEG only** in the app (Acros +R, Tri-X 1600, GR Retro, GR Hi-Contrast B&W, Sony SH, Polaroid) are
@@ -129,19 +136,19 @@ Failures are as useful as successes.
 | **RX100 V** | DSC-RX100M5 | ✅ |  |
 | **HX60 / HX60V** | DSC-HX60 | ✅ | zoom and flash could not be used ([#42](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/42)) |
 | **A7S II** | ILCE-7SM2 | ✅ | the image stabiliser misbehaved with a manual lens while the app was open ([#48](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/48)) |
-| **RX100 III** | DSC-RX100M3 | ✅ |  |
+| **RX100 III** | DSC-RX100M3 | ✅ | one owner could not get the look into **MR** even after registering it from P/A/S/M and power-cycling ([#117](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/117)) |
 | **RX1R II** | DSC-RX1RM2 | ✅ |  |
 | **A5000** | ILCE-5000 | ✅ | no **Fn** button: the brand list is under **hold MENU → Browse recipes**; one sample run froze the camera after about eight frames, and only pulling the battery brought it back ([#58](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/58)) |
 | **HX90 / HX90V** | DSC-HX90 | ✅ |  |
-| **NEX-5R** | NEX-5R | ✅ |  |
+| **NEX-5R** | NEX-5R | ✅ | one owner (firmware 1.00): 1.7.0 and earlier run, 1.8.0 onward start with a black screen and the app is unusable ([#130](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/130)) |
 | **A7S** | ILCE-7S | ✅ |  |
 | **NEX-6** | NEX-6 | ✅ |  |
 | A68 | ILCA-68 | ❔ | not in the installer's device table, so even the install is untested |
 | A77 II | ILCA-77M2 | ❌ | one owner (firmware 2.00) found no `MENU → Application`, and the installer refused the camera with `This device does not support apps` ([#114](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/114)) |
 | A99 II | ILCA-99M2 | ❔ |  |
-| **RX100 IV** | DSC-RX100M4 | ✅ |  |
+| **RX100 IV** | DSC-RX100M4 | ✅ | the zoom rocker does not zoom inside the app, only the lens ring does ([#123](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/123)) |
 | RX10 II | DSC-RX10M2 | ❔ |  |
-| RX10 III | DSC-RX10M3 | ❔ |  |
+| **RX10 III** | DSC-RX10M3 | ✅ |  |
 | HX400 / HX400V | DSC-HX400 | ❔ | compact; no control wheel of the kind the app is driven with |
 | **WX500** | DSC-WX500 | ✅ | the rear wheel scrolls the recipes; playback or power off closes the app |
 
@@ -164,7 +171,7 @@ which closed in 2021.
 | **Cyber-shot** | RX100 VA, RX100 VI, RX100 VII, RX10 IV, RX0, RX0 II, HX99, ZV-1, ZV-1F, ZV-1 II |
 
 …and everything released since, as well as bodies from before Sony's app store, such as the HX50 / HX50V
-([#115](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/115)). The menu is the test: no `MENU → Application`
+([#115](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/115)) and the NEX-5N ([#136](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/136)). The menu is the test: no `MENU → Application`
 on your camera, no app — so reports of Recipe Lab running on an A6400 or similar are mistaken.
 
 ## Installing
@@ -271,8 +278,12 @@ Open **Recipe Lab** from the Application List. The live view shows the look. The
 
 **Menu** — **hold MENU**
 
-- **Browse recipes** · **New recipe** · **Panel visibility** · **Language** · **Reset settings** · **Save a bug report** · **About** · **Developer**.
+- **Browse recipes** · **New recipe** · **Transfer to phone** · **Sync recipes** · **Panel visibility** · **Language** · **Reset settings** ·
+  **Save a bug report** · **About** · **Developer**.
 - **New recipe** saves the camera's current settings as a [custom recipe](#custom-recipes).
+- **Transfer to phone** sends your photos to the phone over Wi-Fi — see [Transfer to phone](#transfer-to-phone).
+- **Sync recipes** opens the same Wi-Fi link for custom recipes: [Recipe Lab Studio](https://recipelab.io/studio) copies the ones the phone lacks
+  and sends the ones the card lacks. Leave the page with MENU and they are under Custom.
 - Languages: *Auto*, English, 简体中文, 繁體中文, 日本語, 한국어, Tiếng Việt.
 
 ## Custom recipes
@@ -323,6 +334,30 @@ exposure: +0.7               # -5.0 .. +5.0 in thirds
 
 Full file format: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md#custom-recipes).
 
+## Transfer to phone
+
+Send RAWs and JPEGs from the memory card to your phone over Wi-Fi. No cable, no computer, no router: the camera
+makes its own Wi-Fi network.
+
+You need **[Recipe Lab Studio](https://recipelab.io/studio)** on the phone: it lists the photos by their previews and
+pulls the ones you want, then develops them with your Recipe Lab looks, film grain and mist. It also sees your custom
+recipes in `RECIPES`, and sends its own back: see **Sync recipes** in the [menu](#how-to-use).
+
+1. **Hold MENU → Transfer to phone.** The camera starts its Wi-Fi; after a few seconds the page says **Ready** and
+   shows the network's name and password in large type.
+2. On the phone, join that Wi-Fi network with that password.
+3. In Recipe Lab Studio: **Import → From camera (Wi-Fi) → Already on the camera's Wi-Fi**.
+4. Leave the camera on that page while the phone imports. It will not switch itself off.
+
+**MENU** stops it: the transfer ends, the camera's Wi-Fi goes off, auto power-off comes back. Leaving the app any
+other way stops it too.
+
+- **Speed:** about **1 MB/s** — roughly 25 s for a 24 MP RAW. Previews are small, so browsing is quick. Pull the full
+  RAWs only for the photos you keep.
+- **If it says Error**, the line under the card says why. Check Airplane Mode is off, press MENU and open Transfer to
+  phone again.
+- **Nothing is changed on the card.** The phone can only read.
+
 ## What it changes
 
 Only camera settings you could set by hand: Creative Style and its saturation, contrast and sharpness sliders, white
@@ -332,8 +367,10 @@ balance and its fine-tune, exposure compensation, DRO, Picture Effect. No firmwa
 is on, and it only works with **Quality = JPEG** — set to RAW or RAW+JPEG, the camera drops the effect silently.
 
 **Quality** therefore follows you rather than being dictated by a recipe. The Factory recipe starts as whatever the
-camera is set to, and every Creative Style recipe uses that. Change it any time with the `QUALITY` chip. Only when a
-recipe needs JPEG and you are on RAW does the app ask:
+camera is set to, and every Creative Style recipe uses that. Change it any time with the `QUALITY` chip. The chip offers
+RAW+JPG and the JPEG settings, not RAW alone: with no JPEG there is nothing for the look to be applied to. A camera left
+on RAW alone is moved to RAW+JPG when you store, after the app asks. Only when a recipe needs JPEG and you are on RAW
+or RAW+JPG does the app ask:
 
 ```
 Quality: RAW+JPG → JPG Fine — JPEG is needed to apply this recipe
@@ -373,7 +410,7 @@ The common questions — RAW files, damage, LUTs, newer bodies — are in the **
 | `Not written — the camera holds these settings read-only` or `WRITE FAILED` | The camera refused the recipe. Install [OpenMemories-Tweak](https://github.com/ma1co/OpenMemories-Tweak), open **Protection**, tick *Unlock protected settings* until it reads *Protection disabled*, then pick the recipe again |
 | Look not applied after picking a recipe | Turn the camera off and on |
 | Look gone after a power cycle, or the recipe will not store, with the mode dial on **MR** / **1** / **2** | Memory Recall loads the settings registered to that position at power-on, over whatever the app stored. Turn the dial to P, A, S or M, store the recipe again, and register it to the MR slot from the camera's menu if you want it there ([#59](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/59)) |
-| Look right in the app, gone once you leave it | If your camera has a **Picture Profile** menu (the A6000 does not), set `MENU → Picture Profile` to *Off* and pick the recipe again. While a Picture Profile runs, the camera ignores Creative Style and its sliders. Older recipes that used the colour matrix could switch PP3 on themselves on these bodies ([#38](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/38)); picking any recipe now switches it off |
+| Look right in the app, gone once you leave it, or no look at all | If your camera has a **Picture Profile** menu (the A6000 does not), it must be *Off*: while a Picture Profile runs, the camera ignores Creative Style and its sliders. The app asks to turn it off each time it opens with one on ([#90](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/90)); choose **Turn off**, or set `MENU → Picture Profile` to *Off* yourself, and pick the recipe again. Older recipes that used the colour matrix could switch PP3 on themselves on these bodies ([#38](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/38)); picking any recipe now switches it off |
 | `no live preview: ...` in the panel | Something else is holding the camera; close and reopen the app |
 | Anything else, or to report a bug | In the app, **hold MENU → Save a bug report**. Connect the camera to a computer (or put the card in a reader) and attach `RECIPLAB/REPORT.TXT` to a [bug report](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/new?template=bug_report.yml) or [compatibility report](https://github.com/voxivoid/recipe-lab-sony-pmca/issues/new?template=compatibility_report.yml). That one file holds everything we need. Step by step: [FAQ](docs/FAQ.md#something-went-wrong) |
 | Text shows `Â·` | Old build; install the APK from the [latest release](https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest) |

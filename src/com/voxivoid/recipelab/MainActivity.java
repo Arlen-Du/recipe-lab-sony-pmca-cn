@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -15,6 +16,9 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.voxivoid.recipelab.transfer.Logger;
+import com.voxivoid.recipelab.transfer.TransferMode;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,12 +41,15 @@ import static com.voxivoid.recipelab.Params.*;
  * Keys (issue #18 — every function on keys every body has; Fn is a shortcut where it exists, see {@link Keys}):
  *       wheel / dial / LEFT / RIGHT recipe, chip or value · UP / DOWN line · ENTER pick · hold ENTER favourite
  *       TRASH overlay: full → pill → hidden · hold TRASH reset (asks first) · hold MENU app menu (browse, panel,
- *       language, reset, about, developer) · SHUTTER photo · MENU exit · Fn brand browser
+ *       transfer to phone, language, reset, about, developer) · SHUTTER photo · MENU exit · Fn brand browser
  *       hold MENU on a custom recipe in the brand list: its options (rename, delete); a short MENU still closes the list
  *
  * Custom recipes ({@link CustomRecipes}) live on the memory card; {@link Library} gives them indexes after the table's.
  * Finishing an edit of a built-in recipe offers to keep it as a new custom recipe; an edit of a custom one is saved in
  * place. Names are typed on the name editor ({@link NameEntry}, {@link KeyboardView}).
+ *
+ * Transfer to phone (app menu) serves the memory card over Wi-Fi for Recipe Lab Studio on a phone: a page of the menu
+ * drives {@link TransferMode}, which stops when the page or the app is left.
  *
  * This class holds the state and talks to the camera, the store and the views. What a value means, how the store
  * encodes it, what the preview sets and where a key press lands is decided in {@link Params}, {@link Keys} and
@@ -63,7 +70,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     /**
      * the questions the prompt asks: quality change, reset, discard a recipe's edits, a custom recipe's options, delete it
      */
-    private static final int P_QUALITY = 0, P_RESET = 1, P_DISCARD = 2, P_OPTIONS = 3, P_DELETE = 4;
+    private static final int P_QUALITY = 0, P_RESET = 1, P_DISCARD = 2, P_OPTIONS = 3, P_DELETE = 4, P_PP = 5;
     private Runnable afterDiscard;                               // what the discard question goes on to do when answered Discard
     // the name editor, and what its OK does: keep a recipe's edits as a copy and store it, keep the camera's settings, rename
     private KeyboardView keyboard;
@@ -82,7 +89,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private int menuLevel = DevTools.LEVEL_APP, menuPage = PAGE_ROWS;   // which menu, and whether it shows rows or a read-only page
     private int menuSel = 0, settleIdx = DevTools.SETTLE_DEFAULT;   // menu: highlighted row · developer menu: chosen settle delay
     private int langChoice = Lang.AUTO;                         // the Language row: Lang.AUTO or a language
-    private static final int PAGE_ROWS = 0, PAGE_ABOUT = 1;
+    private static final int PAGE_ROWS = 0, PAGE_ABOUT = 1, PAGE_TRANSFER = 2;
+    private TransferMode transfer;                              // Transfer to phone, while its page is open (null otherwise)
+    private boolean transferSync;                               // the page was opened as Sync recipes: same link, its own words
     private Keys.Caps caps = Keys.Caps.UNKNOWN;                 // the shortcut keys this body reports (KeyProbe)
     private HintBar hints;
     private SponsorLine sponsor;
@@ -194,9 +203,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
      * logged; and every camera parameter in PARAMS.TXT, rewritten only when they changed. All of it comes from what
      * onResume has already read (load, the camera's parameters), so an opening costs one short line most of the time.
      */
+    private static String androidVersion() {
+        return CardLog.android(Build.VERSION.RELEASE, Build.VERSION.SDK_INT);
+    }
+
     private void logOpen() {
         lastMode = CardLog.param(origFlat, CardLog.MODE_KEY);
-        String head = CardLog.header(KeyProbe.prop("model.name"), KeyProbe.firmware(), KeyProbe.prop("version.platform"), versionName(), keysFound(), lastMode);
+        String head = CardLog.header(KeyProbe.prop("model.name"), KeyProbe.firmware(), KeyProbe.prop("version.platform"), androidVersion(), versionName(), keysFound(), lastMode);
         log(CardLog.OPEN, head);
         String state = CardLog.state(cur);
         if (!state.equals(prefs.getString("loggedState", null))) {
@@ -222,8 +235,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         if (root == null) { showToast(Lang.t("report_need_card"), 4000); return; }
         String flat = null;
         try { if (camera != null) flat = camera.getParameters().flatten(); } catch (Throwable t) {}
-        String head = CardLog.header(KeyProbe.prop("model.name"), KeyProbe.firmware(), KeyProbe.prop("version.platform"), versionName(), keysFound(),
-                CardLog.param(flat, CardLog.MODE_KEY));
+        String head = CardLog.header(KeyProbe.prop("model.name"), KeyProbe.firmware(), KeyProbe.prop("version.platform"), androidVersion(), versionName(),
+                keysFound(), CardLog.param(flat, CardLog.MODE_KEY));
         try {
             CardLog.replace(CardLog.reportDir(root), CardLog.REPORT,
                     CardLog.report(CardLog.dir(root), CardLog.now(), head,
@@ -321,12 +334,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             showToast(Keys.notice(), 8000);
             prefs.edit().putBoolean("keysNoticeSeen", true).commit();
         }
+        if (Params.asksPictureProfileOff(cur)) openPrompt(P_PP, Params.PP_DEFAULT);   // every time: no recipe shows while it runs (#90)
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         stopRun(false);                                          // a run cannot outlive the camera it shoots with
+        stopTransfer();                                          // leaving the app stops Transfer to phone: hotspot off, auto power-off back
         closeMenu();
         closeName();
         if (promptOpen && promptKind >= P_DISCARD) { closePrompt(); afterDiscard = null; }   // about this recipe: the card is read again on the way back
@@ -341,6 +356,12 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         try { if (camera != null) camera.stopPreview(); } catch (Throwable t) {}
         try { if (cameraEx != null) cameraEx.getClass().getMethod("release").invoke(cameraEx); } catch (Throwable t) {}
         cameraEx = null; camera = null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopTransfer();                                          // onPause has normally done it; never leave Wi-Fi on behind the app
+        super.onDestroy();
     }
 
     public void surfaceCreated(SurfaceHolder h) {
@@ -385,7 +406,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     /** the Factory recipe's quality: the camera's current one until the user changes it in the app, then remembered */
-    private int baseQuality() { int b = prefs.getInt("baseQuality", -1); return b >= 0 && b < 4 ? b : cur[R_QUAL]; }
+    private int baseQuality() { int b = prefs.getInt("baseQuality", -1); b = b >= 0 && b < 4 ? b : cur[R_QUAL]; return b == Q_RAW ? Q_RAWJPG : b; }
     private int recipeQuality(Recipes.Recipe r) { return Params.recipeQuality(r, baseQuality()); }
     /** user changed quality on the current recipe: CS recipes and JPEG choices on PE recipes redefine the Factory quality */
     private void qualityChanged() {
@@ -446,6 +467,26 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         showToast(msg, ok ? 5000 : 0); render();
     }
 
+    /** "Turn off" on the Picture Profile question: writes that one byte, and leaves the staged recipe as it is */
+    private void turnPictureProfileOff() {
+        List<Params.Write> ws = Params.pictureProfileOff();
+        String what = "Picture Profile off";
+        List<Integer> locked = Params.lockedFrom(ws, attrsOf(ws));
+        if (!locked.isEmpty()) { log(CardLog.FAIL, what + ": read-only " + CardLog.ids(locked)); showToast(Params.lockedMessage(locked), 0); return; }
+        Params.Write w = ws.get(0);
+        try { NativeBackup.writeByte(w.id, w.value); }
+        catch (Throwable t) {
+            log(CardLog.FAIL, what + ": " + CardLog.writeFailed(w.id, w.value, String.valueOf(t.getMessage()), 0, ws.size()));
+            showToast(Params.writeFailedMessage(w.id, String.valueOf(t.getMessage()), 0), 0);
+            return;
+        }
+        NativeBackup.sync();
+        log(CardLog.WRITE, CardLog.written(what, ws));
+        cur[R_PP] = 0; edit[R_PP] = 0;                           // not load(): that would put the stored look over the staged recipe
+        applyPreview();
+        showToast(Lang.t("status_pp_off"), 3000); render();
+    }
+
     /**
      * The recipe the app reopens on: the last one selected (centre in the brand list) or applied (any write, New recipe),
      * whichever came last — never just the last one the wheel scrolled past. A custom one is kept by name, as its index
@@ -496,6 +537,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             case P_DISCARD: prompt.set(CustomRecipes.discardTitle(Recipes.displayName(r)), CustomRecipes.discardBody(), CustomRecipes.discardOptions(), promptSel, null); break;
             case P_OPTIONS: prompt.set(r.name, CustomRecipes.optionsBody(library.entry(recipe).file), CustomRecipes.options(), promptSel, null); break;
             case P_DELETE: prompt.set(CustomRecipes.deleteTitle(r.name), CustomRecipes.deleteBody(library.entry(recipe).file), CustomRecipes.deleteOptions(), promptSel, null); break;
+            case P_PP: { String[] q = Params.pictureProfilePrompt(); prompt.set(q[0], q[1], Params.pictureProfileOptions(), promptSel, null); break; }
             default: {
                 String[] q = Params.qualityPrompt(cur, edit);
                 String[] opts = { Lang.t("button_accept"), Lang.t("button_cancel") };
@@ -541,12 +583,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                 else if (promptSel == CustomRecipes.OPT_DELETE) openPrompt(P_DELETE, CustomRecipes.DELETE_DEFAULT);
                 return;
             case P_DELETE: if (promptSel == 0) deleteCustom(); return;
+            case P_PP: if (promptSel == Params.PP_OFF) turnPictureProfileOff(); else showToast(Lang.t("status_pp_kept"), 3000); return;
             default: if (promptSel == 0) writeAll(true); else showToast(Lang.t("status_not_picked"), 2000);   // cancel: recipe stays previewed only
         }
     }
 
     private void cycleQuality() {
-        edit[R_QUAL] = (edit[R_QUAL] + 1) % 4; qualityChanged(); applyPreview(); render();
+        Params.step(edit, R_QUAL, +1, baseQuality()); qualityChanged(); applyPreview(); render();
         showToast(Lang.t(qualityPersistent() ? "status_quality_pick" : "status_quality_live", qualityLabel(edit[R_QUAL])), 2500);
     }
 
@@ -621,6 +664,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private void renderMenu() {
         if (menuPage == PAGE_ABOUT) menu.setPage(DevTools.aboutTitle(), DevTools.about(versionName(), KeyProbe.prop("model.name"),
                 KeyProbe.firmware(), KeyProbe.prop("version.platform")), DevTools.aboutFooter(), Keys.hints(Keys.H_PAGE, caps));
+        else if (menuPage == PAGE_TRANSFER && transfer != null) menu.setTransfer(transferSync ? DevTools.syncTitle() : DevTools.transferTitle(),
+                DevTools.transferPage(transfer.state(), transfer.stats(), transfer.rate(), transferSync), Keys.hints(Keys.H_TRANSFER, caps));
         else {
             int n = DevTools.rows(menuLevel);
             boolean app = menuLevel == DevTools.LEVEL_APP, snapshotTaken = !app && snapFile().exists();
@@ -659,6 +704,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             switch (menuSel) {
                 case DevTools.APP_BROWSE: closeMenu(); browse(); break;
                 case DevTools.APP_NEW: closeMenu(); openName(NAME_NEW); break;   // the camera's current settings, kept as a recipe
+                case DevTools.APP_TRANSFER: openTransfer(false); break;
+                case DevTools.APP_SYNC: openTransfer(true); break;
                 case DevTools.APP_PANEL: case DevTools.APP_LANG: stepMenuValue(+1); break;
                 case DevTools.APP_RESET: closeMenu(); askReset(); break;
                 case DevTools.APP_REPORT: closeMenu(); saveReport(); break;
@@ -711,6 +758,45 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                 else closeMenu();
                 return true;
         }
+        return true;
+    }
+
+    // ------------------------------------------------------------ Transfer to phone (app menu): a page that serves the card over Wi-Fi
+    /**
+     * the camera's hotspot and the server up, the page showing how it goes — refreshed by every event and once a second.
+     * {@code sync} opens it as Sync recipes: the link is the same one, the page says where recipes go on the phone
+     */
+    private void openTransfer(boolean sync) {
+        transferSync = sync;
+        if (transfer == null) transfer = new TransferMode(this, transferModel(), new Logger() {
+            public void info(String msg) { log(CardLog.TRANSFER, msg); }
+            public void error(String msg, Throwable t) { log(CardLog.TRANSFER, msg + ": " + t); }
+        }, new TransferMode.Listener() {
+            public void changed() { if (menuOpen && menuPage == PAGE_TRANSFER) renderMenu(); }
+        });
+        menuPage = PAGE_TRANSFER;
+        transfer.start();
+        renderMenu();
+    }
+
+    /** server, hotspot and Wi-Fi off, auto power-off back on */
+    private void stopTransfer() {
+        if (transfer != null) transfer.stop();
+        transfer = null;
+    }
+
+    /** the model the phone is told: Sony's model.name (ILCE-6000) — Build.MODEL is ScalarA on every body — else Build.MODEL */
+    private static String transferModel() {
+        String m = KeyProbe.prop("model.name");
+        return m != null && !m.isEmpty() ? m : Build.MODEL;
+    }
+
+    /** keys on the Transfer to phone page: MENU stops and goes back; nothing else does anything there */
+    private boolean transferKey(int sc, int repeat) {
+        if (repeat > 0 || (sc != K_MENU && sc != K_SK1)) return true;
+        swallowMenuUp = true; stopTransfer(); menuPage = PAGE_ROWS;
+        reloadCustoms();                                         // the phone may have sent recipes
+        renderMenu();
         return true;
     }
 
@@ -1357,6 +1443,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         if (running) return runKey(sc);
         if (promptOpen) return promptKey(sc);
         if (nameOpen) return nameKey(sc);
+        if (menuOpen && menuPage == PAGE_TRANSFER && transfer != null) return transferKey(sc, e.getRepeatCount());
         if (menuOpen) return menuKey(sc);
         if (sc == K_ENTER) { enterDown(e.getRepeatCount()); return true; }
         if (sc == K_AEL || sc == K_C1 || sc == K_DISP) return true;   // not bound on any screen (issue #18)
