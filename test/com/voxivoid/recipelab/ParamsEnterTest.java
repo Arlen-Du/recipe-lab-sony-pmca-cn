@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-/** The centre button: what a short press does, and where a hold marks a favourite instead; and where a MENU hold opens the app menu. */
+/** The centre button: what a short press does, and where a hold marks a favorite instead; and where a MENU hold opens the app menu. */
 class ParamsEnterTest {
 
     @Test void theChipStripOnlyTakesTheKeysUnderTheFullPanel() {
@@ -32,16 +32,16 @@ class ParamsEnterTest {
         assertEquals(ENTER_BROWSER_COLUMN, enterAction(OV_BROWSER, R_SAT, COL_GROUPS), "the chip row is not reachable in the browser");
     }
 
-    @Test void aHoldMarksAFavouriteWhereverARecipeIsWhatTheScreenIsAbout() {
-        assertTrue(holdMarksFavourite(OV_FULL, R_RECIPE, COL_RECIPES));
-        assertTrue(holdMarksFavourite(OV_PILL, R_SAT, COL_RECIPES), "the pill names a recipe");
-        assertTrue(holdMarksFavourite(OV_HIDDEN, R_SAT, COL_RECIPES));
-        assertTrue(holdMarksFavourite(OV_BROWSER, R_RECIPE, COL_RECIPES));
+    @Test void aHoldMarksAFavoriteWhereverARecipeIsWhatTheScreenIsAbout() {
+        assertTrue(holdMarksFavorite(OV_FULL, R_RECIPE, COL_RECIPES));
+        assertTrue(holdMarksFavorite(OV_PILL, R_SAT, COL_RECIPES), "the pill names a recipe");
+        assertTrue(holdMarksFavorite(OV_HIDDEN, R_SAT, COL_RECIPES));
+        assertTrue(holdMarksFavorite(OV_BROWSER, R_RECIPE, COL_RECIPES));
     }
 
     @Test void aHoldDoesNothingOnAChipOrOnTheGroupColumn() {
-        assertFalse(holdMarksFavourite(OV_FULL, R_SAT, COL_RECIPES), "the highlight is a value, not a recipe");
-        assertFalse(holdMarksFavourite(OV_BROWSER, R_RECIPE, COL_GROUPS), "the highlight is a group");
+        assertFalse(holdMarksFavorite(OV_FULL, R_SAT, COL_RECIPES), "the highlight is a value, not a recipe");
+        assertFalse(holdMarksFavorite(OV_BROWSER, R_RECIPE, COL_GROUPS), "the highlight is a group");
     }
 
     @Test void aHoldNeverStealsTheKeyFromFocusingAChip() {
@@ -50,7 +50,7 @@ class ParamsEnterTest {
             for (int row : new int[] { R_RECIPE, R_SAT, R_QUAL }) {
                 for (int col : new int[] { COL_GROUPS, COL_RECIPES }) {
                     int action = enterAction(overlay, row, col);
-                    boolean marks = holdMarksFavourite(overlay, row, col);
+                    boolean marks = holdMarksFavorite(overlay, row, col);
                     String at = "overlay " + overlay + " row " + row + " col " + col;
                     if (action == ENTER_FOCUS || action == ENTER_BROWSER_COLUMN) assertFalse(marks, at);
                     else assertTrue(marks, at);
@@ -94,5 +94,19 @@ class ParamsEnterTest {
     @Test void aMenuHoldDoesNotArmWhereMenuActsOnThePress() {
         assertFalse(menuHoldArms(OV_FULL, true), "MENU unfocuses the chip");
         assertFalse(menuHoldArms(OV_BROWSER, false), "MENU closes the browser");
+    }
+
+    @Test void leavingTheBrowserGoesBackToTheFullPanelItCameFrom() {
+        assertEquals(OV_QUIET, fullPanel(OV_BROWSER, OV_QUIET), "the one without the legend, if that is how it was left");
+        assertEquals(OV_FULL, fullPanel(OV_BROWSER, OV_FULL));
+        assertEquals(OV_FULL, fullPanel(OV_BROWSER, OV_PILL), "the pill and hidden come back as the full panel");
+        assertEquals(OV_FULL, fullPanel(OV_BROWSER, OV_HIDDEN));
+    }
+
+    @Test void theFullPanelOfALiveScreenIsItsOwn() {
+        assertEquals(OV_QUIET, fullPanel(OV_QUIET, OV_FULL));
+        assertEquals(OV_FULL, fullPanel(OV_FULL, OV_QUIET), "where it was before only counts from the browser");
+        assertEquals(OV_FULL, fullPanel(OV_PILL, OV_QUIET));
+        assertEquals(OV_FULL, fullPanel(OV_HIDDEN, OV_FULL));
     }
 }

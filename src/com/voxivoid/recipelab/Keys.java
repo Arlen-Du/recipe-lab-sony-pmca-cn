@@ -36,6 +36,7 @@ final class Keys {
             case K_WHEEL_CW: return "WHEEL+"; case K_WHEEL_CCW: return "WHEEL-"; case K_DIAL_CW: return "DIAL+"; case K_DIAL_CCW: return "DIAL-";
             case K_DIAL2_CW: return "DIAL2+"; case K_DIAL2_CCW: return "DIAL2-"; case K_DIAL3_CW: return "DIAL3+"; case K_DIAL3_CCW: return "DIAL3-"; case K_MOVIE: return "MOVIE"; case 637: return "MOVIE2";
             case K_ZOOM_T: return "ZOOM_T"; case K_ZOOM_W: return "ZOOM_W"; case 533: return "AFMF";
+            case K_WHEEL_STATUS: return "WHEEL"; case K_DIAL_STATUS: return "DIAL";
             case K_AEL_LEVER: return "AEL_LEVER"; case K_AEL_AFMF: return "AEL_AFMF"; case 588: return "CUSTOM";
             case 623: return "C2"; case 659: return "C3"; case 572: return "MODE_DIAL"; case 519: return "FINDER";
             case 530: return "LENS"; case 591: return "UP_RIGHT"; case 592: return "DOWN_RIGHT"; case 593: return "UP_LEFT"; case 594: return "DOWN_LEFT";
@@ -137,7 +138,7 @@ final class Keys {
      */
     static final int H_RECIPE = 0, H_CHIPS = 1, H_EDIT = 2, H_BRANDS = 3, H_RECIPES = 4, H_MENU_TOP = 5, H_MENU_SUB = 6,
             H_PAGE = 7, H_LOGGER = 8, H_MENU_TOP_VALUE = 9, H_MENU_SUB_VALUE = 10, H_RECIPES_CUSTOM = 12,
-            H_NAME = 14, H_ACTIONS = 15, H_TRANSFER = 16;
+            H_NAME = 14, H_ACTIONS = 15, H_TRANSFER = 16, H_SHARE = 17;
 
     /** one legend row: per item an icon, an optional shortcut icon drawn before it (I_NONE for none), and a label */
     static final class Hints {
@@ -172,7 +173,7 @@ final class Keys {
             case H_RECIPE: {
                 Row r = new Row().add(I_ENTER, Lang.t("action_pick"));
                 if (caps.hasFn()) r.add(I_FN, Lang.t("action_browse"));
-                r.add(I_ENTER, Lang.t("action_favourite_hold"));
+                r.add(I_ENTER, Lang.t("action_favorite_hold"));
                 return r.add(I_MENU, Lang.t("action_menu_hold")).add(I_TRASH, Lang.t("action_hide")).add(I_MENU, Lang.t("action_exit")).done();
             }
             case H_CHIPS: {
@@ -183,8 +184,8 @@ final class Keys {
             case H_EDIT: return new Row().add(I_ENTER, Lang.t("action_done")).done();
             case H_ACTIONS: return new Row().add(I_LEFTRIGHT, Lang.t("action_move")).add(I_ENTER, Lang.t("action_select")).add(I_MENU, Lang.t("action_exit")).done();
             case H_BRANDS: return new Row().add(I_ENTER, Lang.t("action_recipes")).add(I_MENU, fn, Lang.t("action_close")).done();
-            case H_RECIPES: return new Row().add(I_ENTER, Lang.t("action_pick")).add(I_ENTER, Lang.t("action_favourite_hold")).add(I_MENU, fn, Lang.t("action_close")).done();
-            case H_RECIPES_CUSTOM: return new Row().add(I_ENTER, Lang.t("action_pick")).add(I_ENTER, Lang.t("action_favourite_hold"))
+            case H_RECIPES: return new Row().add(I_ENTER, Lang.t("action_pick")).add(I_ENTER, Lang.t("action_favorite_hold")).add(I_MENU, fn, Lang.t("action_close")).done();
+            case H_RECIPES_CUSTOM: return new Row().add(I_ENTER, Lang.t("action_pick")).add(I_ENTER, Lang.t("action_favorite_hold"))
                     .add(I_MENU, Lang.t("action_options_hold")).add(I_MENU, fn, Lang.t("action_close")).done();
             case H_NAME: return new Row().add(I_UPDOWN, Lang.t("action_move")).add(I_ENTER, Lang.t("action_type")).add(I_TRASH, Lang.t("action_delete_char")).add(I_MENU, Lang.t("action_cancel")).done();
             case H_MENU_TOP: return new Row().add(I_UPDOWN, Lang.t("action_move")).add(I_ENTER, Lang.t("action_select")).add(I_MENU, Lang.t("action_close")).done();
@@ -194,6 +195,7 @@ final class Keys {
             case H_PAGE: return new Row().add(I_MENU, Lang.t("action_back")).done();
             case H_LOGGER: return new Row().add(I_MENU, Lang.t("action_exit_hold")).done();
             case H_TRANSFER: return new Row().add(I_MENU, Lang.t("action_stop")).done();
+            case H_SHARE: return new Row().add(I_UPDOWN, Lang.t("action_move")).add(I_LEFTRIGHT, Lang.t("action_shape")).add(I_ENTER, Lang.t("action_select")).add(I_MENU, Lang.t("action_back")).done();
             default: return new Row().done();
         }
     }

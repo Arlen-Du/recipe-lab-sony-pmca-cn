@@ -41,7 +41,7 @@ final class CardLog {
 
     /** the kinds of line, padded so the messages line up */
     static final String OPEN = "OPEN", STATE = "STATE", WRITE = "WRITE", FAIL = "FAIL", PREVIEW = "PREVIEW", SHOOT = "SHOOT", CRASH = "CRASH", INFO = "INFO",
-            TRANSFER = "TRANSFER";
+            TRANSFER = "TRANSFER", QR = "QR";
 
     /** the logs folder under a card root; null without a card */
     static File dir(File cardRoot) { return cardRoot == null ? null : new File(new File(cardRoot, DIR), SUB); }
@@ -109,10 +109,10 @@ final class CardLog {
      * camera holds it (ACTIVE / PREVIEW) and whether its values were changed (EDITED), the display language, and the
      * user's own recipes and marks.
      */
-    static String app(String recipe, boolean active, boolean edited, String language, int customs, List<String> skipped, int favourites) {
+    static String app(String recipe, boolean active, boolean edited, String language, int customs, List<String> skipped, int favorites) {
         return "recipe " + recipe + (active ? "  ACTIVE" : "  PREVIEW") + (edited ? " EDITED" : "") + "  ·  language " + language
                 + "  ·  custom recipes " + customs + (skipped.isEmpty() ? "" : " (skipped: " + join(skipped) + ")")
-                + "  ·  favourites " + favourites;
+                + "  ·  favorites " + favorites;
     }
 
     private static String join(List<String> l) { StringBuilder b = new StringBuilder(); for (String s : l) b.append(b.length() == 0 ? "" : "; ").append(s); return b.toString(); }

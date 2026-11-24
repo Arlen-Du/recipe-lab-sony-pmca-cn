@@ -124,6 +124,14 @@ final class Params {
     }
     /** a recipe's quality given the Factory base: effects need JPEG, so RAW bases become JPEG Fine for them; RAW alone is never kept */
     static int recipeQuality(Recipes.Recipe r, int base) { return r.isEffect() ? (base >= Q_FINE ? base : Q_FINE) : (base == Q_RAW ? Q_RAWJPG : base); }
+    /**
+     * The Factory recipe's quality: the one the user last picked in the app ({@code stored}, -1 for none yet), else the
+     * camera's {@code current}. RAW alone is never the base: RAW+JPEG stands in for it.
+     */
+    static int baseQuality(int stored, int current) {
+        int b = stored >= Q_RAW && stored <= Q_STD ? stored : current;
+        return b == Q_RAW ? Q_RAWJPG : b;
+    }
     /** a quality the user picked on this recipe becomes the Factory base — except a JPEG forced by an effect recipe */
     static boolean redefinesBaseQuality(Recipes.Recipe r, int quality) { return !r.isEffect() || quality >= Q_FINE; }
 
@@ -326,7 +334,7 @@ final class Params {
     }
 
     /**
-     * Whether the recipe shown ({@code key}, Favourites.key) should show the edits last applied rather than its own
+     * Whether the recipe shown ({@code key}, Favorites.key) should show the edits last applied rather than its own
      * values: it is the recipe they were applied to ({@code appliedKey}), and the camera ({@code cur}) still holds them.
      */
     static boolean showsAppliedEdit(String appliedKey, int[] appliedRows, String key, int[] cur) {
@@ -449,10 +457,10 @@ final class Params {
     static boolean onRecipeLine(int overlay, int row) { return row == R_RECIPE || !panelUp(overlay); }
 
     /**
-     * Whether a hold on the centre button marks a favourite where the user is. It does wherever a recipe is what the
+     * Whether a hold on the centre button marks a favorite where the user is. It does wherever a recipe is what the
      * screen is about; it does not on the chip strip, or on the browser's group column, where the highlight is a group.
      */
-    static boolean holdMarksFavourite(int overlay, int row, int browserCol) {
+    static boolean holdMarksFavorite(int overlay, int row, int browserCol) {
         return overlay == OV_BROWSER ? browserCol == COL_RECIPES : onRecipeLine(overlay, row);
     }
 
@@ -462,6 +470,14 @@ final class Params {
      * both of those MENU acts on the press, so there is no release left for a hold to wait on.
      */
     static boolean menuHoldArms(int overlay, boolean focus) { return overlay != OV_BROWSER && !focus; }
+
+    /**
+     * The full panel to come back to from the browser: the one without the legend when that is how it was left
+     * ({@code overlay}, or {@code panelBefore} when the browser is up), else the one with it.
+     */
+    static int fullPanel(int overlay, int panelBefore) {
+        return overlay == OV_QUIET || (overlay == OV_BROWSER && panelBefore == OV_QUIET) ? OV_QUIET : OV_FULL;
+    }
 
     /** what the centre button does when it is released before the hold fires */
     static int enterAction(int overlay, int row, int browserCol) {

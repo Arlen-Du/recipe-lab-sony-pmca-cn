@@ -155,7 +155,7 @@ class LangTest {
         Lang.use(Lang.ZH_HANS);
         assertEquals("Classic Chrome", Recipes.displayName(r));
         assertNull(Recipes.originalName(r), "recipes stay in canonical English without a subtitle");
-        assertEquals("Classic Chrome", r.name, "the identifier favourites and the manifest use never changes");
+        assertEquals("Classic Chrome", r.name, "the identifier favorites and the manifest use never changes");
         assertEquals("柯达", Recipes.groupLabel(3));
         assertEquals("饱和", Params.rowName(Params.R_SAT));
         assertEquals("自动", Recipes.droLabel(Recipes.DRO_AUTO));
@@ -173,7 +173,7 @@ class LangTest {
         int[] raw = cur.clone(); raw[Params.R_PE] = Recipes.PE_RETRO; raw[Params.R_QUAL] = Params.Q_RAW;
         assertEquals("RAW开启: 忽略效果", Params.metaLine(raw, null));
         assertEquals("写入", Keys.hints(Keys.H_RECIPE, Keys.Caps.UNKNOWN).labels[0]);
-        assertEquals("收藏", Favourites.groupName(Favourites.GROUP));
+        assertEquals("收藏", Favorites.groupName(Favorites.GROUP));
         Lang.use(Lang.ZH_HANT);
         assertEquals("RAW 已開啟：相片效果不會生效", Params.metaLine(raw, null));
     }
@@ -253,12 +253,12 @@ class LangTest {
         assertEquals("風格", Params.slotName(Params.ID_STYLE), "while a message on screen names the slot in the menu's language");
     }
 
-    @Test void favouritesAreStoredByTheCanonicalNameInAnyLanguage() {
+    @Test void favoritesAreStoredByTheCanonicalNameInAnyLanguage() {
         List<Integer> favs = new ArrayList<Integer>(Arrays.asList(Fixtures.indexOf("Velvia")));
-        String en = Favourites.encode(favs, new Library(), "");
+        String en = Favorites.encode(favs, new Library(), "");
         Lang.use(Lang.ZH_HANS);
-        assertEquals(en, Favourites.encode(favs, new Library(), ""));
-        assertEquals(favs, Favourites.decode(en, new Library()));
+        assertEquals(en, Favorites.encode(favs, new Library(), ""));
+        assertEquals(favs, Favorites.decode(en, new Library()));
     }
 
     // ---- fonts
@@ -354,5 +354,11 @@ class LangTest {
             }
         }
         return out;
+    }
+
+    @Test void hasAsksOneLanguagesTable() {
+        assertTrue(Lang.has(Lang.EN, "dev_title"));
+        assertTrue(Lang.has(Lang.ZH_HANT, "dev_title"));
+        assertFalse(Lang.has(Lang.EN, "no_such_key"));
     }
 }

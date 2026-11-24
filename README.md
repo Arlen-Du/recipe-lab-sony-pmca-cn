@@ -11,7 +11,8 @@
     <a href="https://recipelab.io">Website</a> ·
     <a href="https://github.com/voxivoid/recipe-lab-sony-pmca/releases/latest/download/RecipeLab.apk">Download the app</a> ·
     <a href="https://recipelab.io/recipes">See every recipe</a> ·
-    <a href="https://recipelab.io/studio">Recipe Lab Studio</a>
+    <a href="https://recipelab.io/studio">Recipe Lab Studio</a> ·
+    <a href="https://discord.gg/TuJrY4Ypc">Discord</a>
   </sub>
 </p>
 
@@ -47,7 +48,7 @@
 - [Custom recipes](#custom-recipes)
   - [Making one](#making-one)
   - [The edit buttons](#the-edit-buttons)
-  - [Rename, delete, favourite](#rename-delete-favourite)
+  - [Rename, delete, favorite](#rename-delete-favorite)
   - [Sharing](#sharing)
 - [Transfer to phone](#transfer-to-phone)
 - [What it changes](#what-it-changes)
@@ -243,7 +244,7 @@ Open **Recipe Lab** from the Application List. The live view shows the look. The
 | **wheel**, **left / right**, **top dial** | next recipe on the name line · next chip on the chip row |
 | **up / down** | move between name, chips and edit buttons |
 | **centre** | pick the recipe · edit a chip · press a button |
-| **hold centre** | favourite on / off |
+| **hold centre** | favorite on / off |
 | **TRASH** | panel: full → no keys → label → hidden |
 | **hold TRASH** | back to the factory look (asks first) |
 | **MENU** | leave the app · close a list |
@@ -268,13 +269,15 @@ Open **Recipe Lab** from the Application List. The live view shows the look. The
 
 **Brand list** — **Fn**, or **hold MENU → Browse recipes**
 
-- Left column: **Favourites**, **Custom**, then the brands. Right column: their recipes.
+- Left column: **All**, **Favorites**, **Custom**, then the brands. Right column: their recipes.
 - **left / right** switches column. **centre** picks.
+- The **wheel** then loops only through the list you picked from — your favorites, one brand — even after a restart.
+  Pick from **All** to loop through every recipe again.
 
-**Favourites**
+**Favorites**
 
 - **Hold centre** on a recipe. A star appears.
-- They wait under **Favourites**, in the order you marked them.
+- They wait under **Favorites**, in the order you marked them.
 
 **Menu** — **hold MENU**
 
@@ -309,13 +312,20 @@ Change any chip and buttons appear under the chips. Press **down** to reach them
 
 Leaving a changed recipe asks first: **Discard** or **Cancel**.
 
-### Rename, delete, favourite
+### Rename, delete, favorite
 
 - In the brand list, **hold MENU** on a custom recipe → **Rename** or **Delete**.
-- **Hold centre** → favourite, as on any recipe.
+- **Hold centre** → favorite, as on any recipe.
 
 ### Sharing
 
+- **Share:** in the brand list, **hold MENU** on a custom recipe → **Share**. Pick a shape (4:5, 1:1, 9:16), then
+  **Save image** (a picture with the settings and a QR code, in playback like a photo) or **Show QR code** (on the
+  screen, for someone next to you). A phone with [Recipe Lab Studio](https://recipelab.io/studio) adds the recipe by
+  scanning the code; anywhere else the link shows the recipe on recipelab.io.
+- **Links:** each recipe's link is in `RECIPES/LINKS.TXT` on the card, to copy into a chat or a post.
+- **Add a shared recipe:** **hold MENU** → **Read Recipe QR Code**, then press the shutter with the code in the frame.
+  The photo it takes is deleted once the code is read.
 - Each recipe is a small YAML file in `RECIPES` on the card — e.g. `RECIPES/GOLDENHO.YML`.
 - **Export:** connect the camera as *Mass Storage*. Copy the files out.
 - **Import:** copy a file into `RECIPES`. Keep its name short: up to 8 letters, then `.YML`. Reopen the app.
@@ -449,6 +459,10 @@ Ilford, Cinema…). The values in this app are re-derived for what the A6000 can
 
 License: [GPL-3.0](LICENSE), © 2026 André Domingues. Releases up to and including v1.7.0 were published under MIT.
 OpenMemories-Platform: MIT, © 2017 ma1co.
+[QR Code generator](https://www.nayuki.io/page/qr-code-generator-library) (`src/io/nayuki/qrcodegen`): MIT, © Project Nayuki.
+[ZXing](https://github.com/zxing/zxing) 3.3.3, the QR code reader subset (`src/com/google/zxing`): Apache-2.0, © ZXing authors
+(patched where the camera's Java lacks a call, marked "Recipe Lab:" in the source).
+Inter, Archivo and Space Mono, cut for the recipe card (`assets/fonts/Card*.ttf`): SIL OFL 1.1, © their project authors.
 
 Additional term under GPL-3.0 section 7(b): any copy or modified version must preserve the attribution
 "Based on Recipe Lab by André Domingues" in its source notices and, where it has an interactive user interface, in

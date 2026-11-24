@@ -2,6 +2,7 @@ package com.voxivoid.recipelab;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.sony.scalar.sysutil.TimeUtil;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -135,9 +136,9 @@ class CardLogTest {
     }
 
     @Test void theAppLineSaysWhatTheScreenShowed() {
-        assertEquals("recipe Velvia  PREVIEW EDITED  ·  language auto (en)  ·  custom recipes 2 (skipped: BAD.YML line 3)  ·  favourites 5",
+        assertEquals("recipe Velvia  PREVIEW EDITED  ·  language auto (en)  ·  custom recipes 2 (skipped: BAD.YML line 3)  ·  favorites 5",
                 CardLog.app("Velvia", false, true, "auto (en)", 2, Arrays.asList("BAD.YML line 3"), 5));
-        assertEquals("recipe Factory  ACTIVE  ·  language zh-Hans  ·  custom recipes 0  ·  favourites 0",
+        assertEquals("recipe Factory  ACTIVE  ·  language zh-Hans  ·  custom recipes 0  ·  favorites 0",
                 CardLog.app("Factory", true, false, "zh-Hans", 0, Arrays.<String>asList(), 0));
     }
 
@@ -198,5 +199,16 @@ class CardLogTest {
         String s = CardLog.stack(new IllegalStateException("boom"));
         assertTrue(s.startsWith("java.lang.IllegalStateException: boom"), s);
         assertTrue(s.contains("CardLogTest"), s);
+    }
+
+    @Test void onTheCameraSonysClockPlusTheMenusOffsets() {
+        TimeUtil.set(2026, 10, 15, 13, 3, 27, 0, 60);     // Lisbon: GMT+0 with summer time on
+        try {
+            assertEquals("2026-10-15 14:03:27", CardLog.now());
+            TimeUtil.set(2026, 1, 1, 2, 0, 0, -300, 0);   // New York in winter, across midnight
+            assertEquals("2025-12-31 21:00:00", CardLog.now());
+        } finally {
+            TimeUtil.clear();
+        }
     }
 }
